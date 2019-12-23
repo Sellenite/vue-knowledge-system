@@ -5,7 +5,11 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "sit": "vue-cli-service build --mode sit",
+    "analyz": "npm run build --report",
+    "analyz-linux": "npm_config_report=true npm run build",
+    "analyz-windows": "set npm_config_report=true && npm run build"
   },
   "dependencies": {
     "core-js": "^3.4.3",
@@ -28,6 +32,7 @@
     "node-sass": "^4.12.0",
     "sass-loader": "^8.0.0",
     "vue-cli-plugin-element": "^1.0.1",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.10",
+    "webpack-bundle-analyzer": "^3.6.0"
   }
 }
