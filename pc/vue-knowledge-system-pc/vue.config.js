@@ -5,7 +5,6 @@ module.exports = {
   productionSourceMap: false,
   lintOnSave: process.env.NODE_ENV === 'development',
   chainWebpack(config) {
-    console.log(process.env.npm_config_report);
     if (process.env.npm_config_report) {
       config.plugin('bundle-analyzer-plugin').use(new BundleAnalyzerPlugin());
     }
