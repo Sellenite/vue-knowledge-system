@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Vue Element Admin',
+  title: 'vue-knowledge-system-pc',
 
   /**
    * @type {boolean} true | false
