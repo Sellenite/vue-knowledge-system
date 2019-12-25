@@ -1,5 +1,6 @@
 <template>
-  <div id="app">
+  <!-- usage: https://github.com/cube-ui/vue-create-api -->
+  <div class="create-api-page">
     <h1>Dialog Demo</h1>
     <button @click="show">Show Dialog</button>
     <button @click="change">Change content</button>
