@@ -11,7 +11,7 @@
 <script>
 import Child from './child.vue'
 export default {
-  name: 'App',
+  name: 'CreateApiPage',
   components: { Child },
   data() {
     return {

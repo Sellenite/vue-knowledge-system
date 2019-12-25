@@ -1,1 +1,1 @@
-import './dialog.js';
+import './create-api';
