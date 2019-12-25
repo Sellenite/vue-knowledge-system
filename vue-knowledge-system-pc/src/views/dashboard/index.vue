@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <el-button>123</el-button>
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Soluta dolore necessitatibus dolorum a facilis ipsam, enim accusantium accusamus in nesciunt, voluptates amet rerum deserunt sint eligendi reprehenderit quasi totam! Fugit.
   </div>
 </template>
 
