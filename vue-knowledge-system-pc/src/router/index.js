@@ -70,14 +70,15 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/error-log',
+    path: '/create-api',
     component: Layout,
+    redirect: '/create-api/index',
     children: [
       {
-        path: 'log',
-        component: () => import('@/views/error-log/index'),
-        name: 'ErrorLog',
-        meta: { title: 'Error Log', icon: 'bug' }
+        path: 'index',
+        component: () => import('@/views/create-api/index'),
+        name: 'CreateAPI',
+        meta: { title: 'CreateAPI', icon: 'skill' }
       }
     ]
   }
@@ -88,6 +89,18 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+  {
+    path: '/error-log',
+    component: Layout,
+    children: [
+      {
+        path: 'log',
+        component: () => import('@/views/error-log/index'),
+        name: 'ErrorLog',
+        meta: { title: 'Error Log', icon: 'bug' }
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
