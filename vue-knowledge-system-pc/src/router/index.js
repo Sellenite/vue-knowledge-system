@@ -115,14 +115,12 @@ export const constantRoutes = [
             path: 'menu1-1',
             component: () => import('@/views/nest/menu1/menu1-1'),
             name: 'NestMenu1-1',
-            isNest: true,
             meta: { title: 'NestMenu1-1' }
           },
           {
             path: 'menu1-2',
             component: () => import('@/views/nest/menu1/menu1-2'),
             name: 'NestMenu1-2',
-            isNest: true,
             meta: { title: 'NestMenu1-2' }
           }
         ]

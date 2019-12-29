@@ -34,17 +34,17 @@ export function filterAsyncRoutes(routes, roles) {
   return res
 }
 
-export function getNestName(routes) {
+export function getNestName(routes = [], parentName = null) {
   let ret = [];
   routes.forEach(route => {
     const tmp = { ...route }
-    if (tmp.isNest) {
+    if (parentName === 'AppNest') {
       ret.push(tmp.name);
     }
     if (tmp.children) {
       ret = [
         ...ret,
-        ...getNestName(tmp.children)
+        ...getNestName(tmp.children, tmp.component.name)
       ];
     }
   })
@@ -62,7 +62,8 @@ const mutations = {
   SET_ROUTES: (state, routes) => {
     state.addRoutes = routes
     state.routes = constantRoutes.concat(routes)
-    state.nestNames = getNestName(state.routes);
+    // in order to solve the nest route cache problem
+    state.nestNames = getNestName(state.routes)
   },
   SET_INIT_STATE: (state, flag) => {
     state.isFirstInit = flag;
