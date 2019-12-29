@@ -34,9 +34,27 @@ export function filterAsyncRoutes(routes, roles) {
   return res
 }
 
+export function getNestName(routes) {
+  let ret = [];
+  routes.forEach(route => {
+    const tmp = { ...route }
+    if (tmp.isNest) {
+      ret.push(tmp.name);
+    }
+    if (tmp.children) {
+      ret = [
+        ...ret,
+        ...getNestName(tmp.children)
+      ];
+    }
+  })
+  return ret;
+}
+
 const state = {
   routes: [],
   addRoutes: [],
+  nestNames: [],
   isFirstInit: true
 }
 
@@ -44,6 +62,7 @@ const mutations = {
   SET_ROUTES: (state, routes) => {
     state.addRoutes = routes
     state.routes = constantRoutes.concat(routes)
+    state.nestNames = getNestName(state.routes);
   },
   SET_INIT_STATE: (state, flag) => {
     state.isFirstInit = flag;

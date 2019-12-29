@@ -5,6 +5,7 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '@/layout'
+import AppNest from '@/layout/components/AppNest'
 
 /* Router Modules */
 
@@ -79,6 +80,58 @@ export const constantRoutes = [
         component: () => import('@/views/create-api/index'),
         name: 'CreateAPI',
         meta: { title: 'CreateAPI', icon: 'skill' }
+      }
+    ]
+  },
+  {
+    path: '/form',
+    component: Layout,
+    redirect: '/form/list',
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/form/list/index'),
+        name: 'FormList',
+        meta: { title: 'FormList', icon: 'form' }
+      }
+    ]
+  },
+  {
+    path: '/nest',
+    component: Layout,
+    redirect: '/nest/menu1/menu1-1',
+    meta: {
+      title: 'Nested Routes',
+      icon: 'nested'
+    },
+    children: [
+      {
+        path: 'menu1',
+        component: AppNest,
+        meta: { title: 'menu1' },
+        redirect: '/nest/menu1/menu1-1',
+        children: [
+          {
+            path: 'menu1-1',
+            component: () => import('@/views/nest/menu1/menu1-1'),
+            name: 'NestMenu1-1',
+            isNest: true,
+            meta: { title: 'NestMenu1-1' }
+          },
+          {
+            path: 'menu1-2',
+            component: () => import('@/views/nest/menu1/menu1-2'),
+            name: 'NestMenu1-2',
+            isNest: true,
+            meta: { title: 'NestMenu1-2' }
+          }
+        ]
+      },
+      {
+        path: 'menu2',
+        component: () => import('@/views/nest/menu2'),
+        name: 'NestMenu2',
+        meta: { title: 'menu2' }
       }
     ]
   }

@@ -3,6 +3,8 @@
     <transition name="fade-transform" mode="out-in">
       <keep-alive :include="cachedViews">
         <router-view :key="key" />
+        <!-- router-view 设置缓存后，引用同一个组件不同路由，更改params和query，不会重新加载 -->
+        <!-- <router-view /> -->
       </keep-alive>
     </transition>
   </section>
@@ -13,7 +15,11 @@ export default {
   name: 'AppMain',
   computed: {
     cachedViews() {
-      return this.$store.state.tagsView.cachedViews
+      if (this.$store.state.tagsView.cachedViews.some((item) => this.$store.state.permission.nestNames.includes(item))) {
+        return ['AppNest', ...this.$store.state.tagsView.cachedViews]
+      } else {
+        return this.$store.state.tagsView.cachedViews
+      }
     },
     key() {
       return this.$route.path
