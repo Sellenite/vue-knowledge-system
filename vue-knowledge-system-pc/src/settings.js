@@ -29,7 +29,7 @@ module.exports = {
    * @type {Boolean} true | false
    * @description Whether sidebar is responsive or not
    */
-  responsive: true,
+  responsive: false,
 
   /**
    * @type {string | array} 'production' | ['production', 'development']

@@ -48,8 +48,12 @@ export default {
     // use $_ for mixins properties
     // https://vuejs.org/v2/style-guide/index.html#Private-property-names-essential
     $_isMobile() {
-      const rect = body.getBoundingClientRect()
-      return rect.width - 1 < WIDTH
+      if (store.state.settings.responsive) {
+        const rect = body.getBoundingClientRect()
+        return rect.width - 1 < WIDTH
+      } else {
+        return false
+      }
     },
     $_resizeHandler() {
       console.log(100)
