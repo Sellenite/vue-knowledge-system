@@ -29,7 +29,13 @@ module.exports = {
    * @type {Boolean} true | false
    * @description Whether sidebar is responsive or not
    */
-  responsive: false,
+  responsiveSidebar: true,
+
+  /**
+   * @type {Boolean} true | false
+   * @description Whether router-view is animation to switch or not
+   */
+  routerAnimation: true,
 
   /**
    * @type {string | array} 'production' | ['production', 'development']

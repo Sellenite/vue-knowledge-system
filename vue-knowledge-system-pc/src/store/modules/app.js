@@ -9,6 +9,12 @@ const state = {
   size: Cookies.get('size') || 'medium'
 }
 
+const getters = {
+  sidebar: state => state.sidebar,
+  device: state => state.device,
+  size: state => state.size
+}
+
 const mutations = {
   TOGGLE_SIDEBAR: state => {
     state.sidebar.opened = !state.sidebar.opened
@@ -51,6 +57,7 @@ const actions = {
 export default {
   namespaced: true,
   state,
+  getters,
   mutations,
   actions
 }

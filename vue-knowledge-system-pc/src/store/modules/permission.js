@@ -58,6 +58,11 @@ const state = {
   isFirstInit: true
 }
 
+const getters = {
+  permission_routes: state => state.routes,
+  isFirstInit: state => state.isFirstInit
+}
+
 const mutations = {
   SET_ROUTES: (state, routes) => {
     state.addRoutes = routes
@@ -91,6 +96,7 @@ const actions = {
 export default {
   namespaced: true,
   state,
+  getters,
   mutations,
   actions
 }

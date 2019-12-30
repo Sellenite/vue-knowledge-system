@@ -2,6 +2,10 @@ const state = {
   logs: []
 }
 
+const getters = {
+  errorLogs: state => state.logs
+}
+
 const mutations = {
   ADD_ERROR_LOG: (state, log) => {
     state.logs.push(log)
@@ -23,6 +27,7 @@ const actions = {
 export default {
   namespaced: true,
   state,
+  getters,
   mutations,
   actions
 }

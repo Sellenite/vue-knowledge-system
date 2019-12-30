@@ -1,19 +1,23 @@
 <template>
   <section class="app-main">
-    <transition name="fade-transform" mode="out-in">
+    <transition name="fade-transform" mode="out-in" v-if="routerAnimation">
       <keep-alive :include="cachedViews">
         <router-view :key="key" />
-        <!-- router-view 设置缓存后，引用同一个组件不同路由，更改params和query，不会重新加载 -->
-        <!-- <router-view /> -->
       </keep-alive>
     </transition>
+    <keep-alive :include="cachedViews" v-else>
+      <router-view :key="key" />
+    </keep-alive>
   </section>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: 'AppMain',
   computed: {
+    ...mapState('settings', ['routerAnimation']),
     cachedViews() {
       if (this.$store.state.tagsView.cachedViews.some((item) => this.$store.state.permission.nestNames.includes(item))) {
         return ['AppNest', ...this.$store.state.tagsView.cachedViews]
@@ -22,7 +26,7 @@ export default {
       }
     },
     key() {
-      return this.$route.path
+      return this.$route.fullPath
     }
   }
 }

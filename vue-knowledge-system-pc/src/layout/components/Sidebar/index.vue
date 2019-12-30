@@ -27,10 +27,8 @@ import variables from '@/styles/variables.scss'
 export default {
   components: { SidebarItem, Logo },
   computed: {
-    ...mapGetters([
-      'permission_routes',
-      'sidebar'
-    ]),
+    ...mapGetters('app', ['sidebar']),
+    ...mapGetters('permission', [ 'permission_routes']),
     activeMenu() {
       const route = this.$route
       const { meta, path } = route

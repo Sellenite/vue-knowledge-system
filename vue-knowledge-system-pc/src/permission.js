@@ -14,7 +14,7 @@ router.beforeEach(async(to, from, next) => {
   document.title = getPageTitle(to.meta.title)
 
   // determine whether the user has logged in
-  if (store.getters.isFirstInit) {
+  if (store.getters['permission/isFirstInit']) {
     await store.dispatch('permission/setInitState', false);
     // get user info
     // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']

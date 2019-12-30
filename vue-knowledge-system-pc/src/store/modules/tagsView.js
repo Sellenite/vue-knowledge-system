@@ -3,6 +3,11 @@ const state = {
   cachedViews: []
 }
 
+const getters = {
+  visitedViews: state => state.visitedViews,
+  cachedViews: state => state.cachedViews,
+}
+
 const mutations = {
   ADD_VISITED_VIEW: (state, view) => {
     if (state.visitedViews.some(v => v.path === view.path)) return
@@ -155,6 +160,7 @@ const actions = {
 export default {
   namespaced: true,
   state,
+  getters,
   mutations,
   actions
 }

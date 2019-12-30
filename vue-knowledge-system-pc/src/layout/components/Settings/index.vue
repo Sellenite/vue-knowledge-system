@@ -25,7 +25,12 @@
 
       <div class="drawer-item">
         <span>Responsive Sidebar</span>
-        <el-switch v-model="responsive" class="drawer-switch" />
+        <el-switch v-model="responsiveSidebar" class="drawer-switch" />
+      </div>
+
+      <div class="drawer-item">
+        <span>Router Animation</span>
+        <el-switch v-model="routerAnimation" class="drawer-switch" />
       </div>
 
     </div>
@@ -74,13 +79,24 @@ export default {
         })
       }
     },
-    responsive: {
+    responsiveSidebar: {
       get() {
-        return this.$store.state.settings.responsive
+        return this.$store.state.settings.responsiveSidebar
       },
       set(val) {
         this.$store.dispatch('settings/changeSetting', {
-          key: 'responsive',
+          key: 'responsiveSidebar',
+          value: val
+        })
+      }
+    },
+    routerAnimation: {
+      get() {
+        return this.$store.state.settings.routerAnimation
+      },
+      set(val) {
+        this.$store.dispatch('settings/changeSetting', {
+          key: 'routerAnimation',
           value: val
         })
       }

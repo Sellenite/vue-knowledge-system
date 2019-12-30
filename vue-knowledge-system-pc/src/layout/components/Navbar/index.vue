@@ -64,9 +64,8 @@ export default {
     Search
   },
   computed: {
-    ...mapGetters([
+    ...mapGetters('app', [
       'sidebar',
-      'avatar',
       'device'
     ])
   },
