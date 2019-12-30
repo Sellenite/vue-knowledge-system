@@ -17,13 +17,19 @@ module.exports = {
    * @type {boolean} true | false
    * @description Whether fix the header
    */
-  fixedHeader: false,
+  fixedHeader: true,
 
   /**
    * @type {boolean} true | false
    * @description Whether show the logo in sidebar
    */
-  sidebarLogo: false,
+  sidebarLogo: true,
+
+  /**
+   * @type {Boolean} true | false
+   * @description Whether sidebar is responsive or not
+   */
+  responsive: true,
 
   /**
    * @type {string | array} 'production' | ['production', 'development']
