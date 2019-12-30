@@ -5,7 +5,7 @@ const state = {
 
 const getters = {
   visitedViews: state => state.visitedViews,
-  cachedViews: state => state.cachedViews,
+  cachedViews: state => state.cachedViews
 }
 
 const mutations = {
