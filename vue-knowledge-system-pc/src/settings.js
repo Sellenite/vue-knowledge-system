@@ -35,7 +35,7 @@ module.exports = {
    * @type {Boolean} true | false
    * @description Whether router-view is animation to switch or not
    */
-  routerAnimation: true,
+  routerAnimation: false,
 
   /**
    * @type {string | array} 'production' | ['production', 'development']

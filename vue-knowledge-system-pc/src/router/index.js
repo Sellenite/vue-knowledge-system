@@ -5,6 +5,7 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '@/layout'
+// eslint-disable-next-line
 import AppNest from '@/layout/components/AppNest'
 
 /* Router Modules */
@@ -84,52 +85,15 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/form',
+    path: '/algorithms',
     component: Layout,
-    redirect: '/form/list',
+    redirect: '/algorithms/index',
     children: [
       {
-        path: 'list',
-        component: () => import('@/views/form/list/index'),
-        name: 'FormList',
-        meta: { title: 'FormList', icon: 'form' }
-      }
-    ]
-  },
-  {
-    path: '/nest',
-    component: Layout,
-    redirect: '/nest/menu1/menu1-1',
-    meta: {
-      title: 'Nested Routes',
-      icon: 'nested'
-    },
-    children: [
-      {
-        path: 'menu1',
-        component: AppNest,
-        meta: { title: 'menu1' },
-        redirect: '/nest/menu1/menu1-1',
-        children: [
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nest/menu1/menu1-1'),
-            name: 'NestMenu1-1',
-            meta: { title: 'NestMenu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nest/menu1/menu1-2'),
-            name: 'NestMenu1-2',
-            meta: { title: 'NestMenu1-2' }
-          }
-        ]
-      },
-      {
-        path: 'menu2',
-        component: () => import('@/views/nest/menu2'),
-        name: 'NestMenu2',
-        meta: { title: 'menu2' }
+        path: 'index',
+        component: () => import('@/views/algorithms/index'),
+        name: 'Algorithms',
+        meta: { title: 'Algorithms', icon: 'excel' }
       }
     ]
   }
@@ -140,18 +104,6 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-  {
-    path: '/error-log',
-    component: Layout,
-    children: [
-      {
-        path: 'log',
-        component: () => import('@/views/error-log/index'),
-        name: 'ErrorLog',
-        meta: { title: 'Error Log', icon: 'bug' }
-      }
-    ]
-  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
