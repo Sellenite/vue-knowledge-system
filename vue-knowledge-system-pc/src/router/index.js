@@ -85,6 +85,19 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/table',
+    component: Layout,
+    redirect: '/table/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/table/index'),
+        name: 'Table',
+        meta: { title: 'Table', icon: 'edit' }
+      }
+    ]
+  },
+  {
     path: '/algorithms',
     component: Layout,
     redirect: '/algorithms/index',

@@ -1,0 +1,2 @@
+这个组件是一个可以通过配置data去配置elementUI现有的使用template进行繁琐的配置
+亦可通过render属性进行动态配置column的内容，基于jsx

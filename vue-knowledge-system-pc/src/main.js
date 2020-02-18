@@ -21,9 +21,13 @@ import '@/utils/error-log' // error log
 
 import * as filters from '@/filters' // global filters
 
+import ElTableColumnFit from '@/components/Table/el-table-column-fit.vue';
+
 Vue.use(Element, {
   size: Cookies.get('size') || 'mini' // set element-ui default size
 })
+
+Vue.component('el-table-column-fit', ElTableColumnFit);
 
 // register global utility filters
 Object.keys(filters).forEach(key => {

@@ -5,6 +5,7 @@
     <p>17_letterCombinations: {{ letterCombinations("234") }}</p>
     <p>914_hasGroupsSizeX: {{ hasGroupsSizeX([1, 2, 3, 4, 4, 3, 2, 1]) }}</p>
     <p>605_canPlaceFlowers: {{ canPlaceFlowers([1,0,0,0,1]) }}</p>
+    <p>89_grayCode: {{ grayCode(3) }}</p>
   </div>
 </template>
 
@@ -14,6 +15,7 @@ import countBinarySubstrings from './js/696_countBinarySubstrings.js';
 import letterCombinations from './js/17_letterCombinations.js';
 import hasGroupsSizeX from './js/914_hasGroupsSizeX.js';
 import canPlaceFlowers from './js/605_canPlaceFlowers.js';
+import grayCode from './js/89_grayCode.js';
 
 export default {
   name: 'Algorithms',
@@ -50,8 +52,15 @@ export default {
     hasGroupsSizeX(array) {
       return hasGroupsSizeX(array);
     },
+    /**
+     * 种花问题
+     * 考察数组遍历问题和边界问题
+     */
     canPlaceFlowers(array, num) {
       return canPlaceFlowers(array, num);
+    },
+    grayCode(number) {
+      return grayCode(number);
     }
   }
 }
