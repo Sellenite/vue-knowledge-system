@@ -109,6 +109,19 @@ export const constantRoutes = [
         meta: { title: 'Algorithms', icon: 'excel' }
       }
     ]
+  },
+  {
+    path: '/complex-table',
+    component: Layout,
+    redirect: '/complex-table/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/complex-table/index'),
+        name: 'ComplexTable',
+        meta: { title: 'ComplexTable', icon: 'edit' }
+      }
+    ]
   }
 ]
 

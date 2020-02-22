@@ -2,31 +2,32 @@
   <!--判断scopedSlots.default可知道是否存在子元素-->
   <el-table-column
     v-if="$scopedSlots.default"
-    v-bind="$props"
     :key="$props.label"
+    v-bind="$props"
     :class-name="_className"
     :min-width="autoFit ? _minWidth : minWidth"
     :width="autoWidth ? _minWidth : width"
   >
     <template slot-scope="scope">
       <!--原element组件使用了作用域插槽, 这里仿照-->
-      <slot v-bind="scope"></slot>
+      <slot v-bind="scope" />
     </template>
   </el-table-column>
   <!--默认情况使用原始 el-table-column-->
   <el-table-column
     v-else
-    v-bind="$props"
     :key="$props.label"
+    v-bind="$props"
     :class-name="_className"
     :min-width="autoFit ? _minWidth : minWidth"
     :width="autoWidth ? _minWidth : width"
-  ></el-table-column>
+  />
 </template>
 
 <script>
 // 改造于：https://github.com/legendJaden/AFTableColumn
 import { TableColumn } from 'element-ui';
+import _ from 'lodash';
 
 export default {
   name: 'el-table-column-fit',
@@ -59,6 +60,12 @@ export default {
       }
     } // 字体比率
   },
+  data() {
+    return {
+      minLength: 5, // 初始也不要写成0, 避免未及时设置宽度太丑
+      getComputedWidth: 0 // 自定义列中获取元素计算的宽度
+    };
+  },
   computed: {
     // table数据
     values() {
@@ -82,6 +89,7 @@ export default {
       if (!this.isFit) return this.$props.minWidth;
       // const maxOne = Math.max(this.minLength, this.$props.label.length * this.fontRate.CHAR_RATE) * this._fontSize + 20;
       // 优先级：minWidth => width => autoFit || autoWidth
+      // eslint-disable-next-line
       return this.$props.minWidth || this.$props.width || Math.max.apply(Math, [this.minLength, this.getMaxLength([this.label]), this.getComputedWidth]);
     },
     // 字体大小
@@ -128,12 +136,6 @@ export default {
         });
       }
     }
-  },
-  data() {
-    return {
-      minLength: 5, // 初始也不要写成0, 避免未及时设置宽度太丑
-      getComputedWidth: 0 // 自定义列中获取元素计算的宽度
-    };
   },
   methods: {
     // 获取数组中元素按字体比例最长长度
