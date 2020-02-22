@@ -3,7 +3,7 @@
  * @param  {Array} data  table的传入的数组
  * @param  {Array} merge 需要合并的key值
  * @return {Array}       返回新的数据数组
- * 
+ * ------------------------------------------------------------
  * 该函数需要配合以下函数传给table的span-method
  * <el-table :data="table" :span-method="objectSpanMethod">
  * objectSpanMethod({ row, column, rowIndex, columnIndex }) {
