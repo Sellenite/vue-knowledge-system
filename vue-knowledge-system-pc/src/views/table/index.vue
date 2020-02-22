@@ -1,10 +1,11 @@
 <template>
   <div class="table-page">
-    <list-table :column-config="columnConfig" />
+    <list-table :data="tableData" :column-config="columnConfig" />
   </div>
 </template>
 
 <script>
+import tableData from './tableData.js';
 import listTable from '@/components/Table/table.vue';
 export default {
   name: 'Table',
@@ -13,6 +14,7 @@ export default {
   },
   data() {
     return {
+      tableData: tableData,
       columnConfig: [
         {
           type: 'radio'

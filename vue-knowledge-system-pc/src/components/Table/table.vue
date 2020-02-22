@@ -1,11 +1,11 @@
 <template>
-  <el-table :data="tableData" v-bind="tableConfig" v-on="tableEvent">
+  <!-- https://cn.vuejs.org/v2/api/#vm-attrs、https://cn.vuejs.org/v2/api/#vm-listeners -->
+  <el-table v-bind="$attrs" v-on="$listeners">
     <table-column v-for="(item, index) in columnConfigComputed" :key="index" :config="item" />
   </el-table>
 </template>
 
 <script>
-import tableData from './tableData.js';
 import tableColumn from './table-column.vue';
 import _ from 'lodash';
 
@@ -14,22 +14,13 @@ export default {
     tableColumn: tableColumn
   },
   props: {
-    tableConfig: {
-      type: Object,
-      default: () => {}
-    },
     columnConfig: {
       type: Array,
       default: () => []
-    },
-    tableEvent: {
-      type: Object,
-      default: () => {}
     }
   },
   data() {
     return {
-      tableData: tableData,
       columnConfigComputed: [],
       currentRow: {}
     }
