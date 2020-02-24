@@ -31,6 +31,7 @@
 import { mergeTableVerticalRow } from '@/utils/table.js';
 import _ from 'lodash';
 export default {
+  // name: 'ComplexTable',
   data() {
     return {
       table: [
