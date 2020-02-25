@@ -19,7 +19,7 @@
           <el-table-column v-for="(item, index) in monthColumn" :key="index" :prop="item.date" :label="item.date.substring(8)" width="36">
             <template slot-scope="scope">
               <!-- 将属性写在dataset里，作为拖拽多选的时候的依据 -->
-              <div class="inline-square" :class="{ 'active': scope.row[scope.column.property] }" @click="clickSquare(scope)" :data-code="scope.row.code" :data-date="scope.column.property" :date-index="scope.$index" />
+              <div class="inline-square" :class="{ 'active': scope.row[scope.column.property] }" :data-code="scope.row.code" :data-date="scope.column.property" :date-index="scope.$index" @click="clickSquare(scope)" />
             </template>
           </el-table-column>
         </el-table-column>
