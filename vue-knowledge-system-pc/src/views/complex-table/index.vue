@@ -12,8 +12,8 @@
     <div style="margin-top: 60px;">
       <el-table :data="dragTable" :span-method="objectSpanMethod" border style="width: 100%">
         <el-table-column type="index" />
-        <el-table-column prop="code" label="产品编码" width="150" />
-        <el-table-column prop="type" label="产品型号" width="100" />
+        <el-table-column prop="code" label="产品编码" min-width="150" />
+        <el-table-column prop="type" label="产品型号" min-width="100" />
         <el-table-column label="2020-02">
           <!-- prop的定义可以在scope.column.property里得出，知道自己点了哪个column -->
           <el-table-column v-for="(item, index) in monthColumn" :key="index" :prop="item.date" :label="item.date.substring(8)" width="36">
