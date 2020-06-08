@@ -44,7 +44,6 @@ export default {
 
 .fixed-header+.app-main {
   padding-top: 60px;
-  height: 100vh;
 }
 
 .hasTagsView {
@@ -55,7 +54,6 @@ export default {
 
   .fixed-header+.app-main {
     padding-top: 94px;
-    height: 100vh;
   }
 }
 </style>

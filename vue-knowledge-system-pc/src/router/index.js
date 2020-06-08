@@ -122,6 +122,19 @@ export const constantRoutes = [
         meta: { title: 'ComplexTable', icon: 'edit' }
       }
     ]
+  },
+  {
+    path: '/echart',
+    component: Layout,
+    redirect: '/echart/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/echart/index'),
+        name: 'Echart',
+        meta: { title: 'Echart', icon: 'edit' }
+      }
+    ]
   }
 ]
 
