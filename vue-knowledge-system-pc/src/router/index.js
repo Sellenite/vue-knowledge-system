@@ -135,6 +135,19 @@ export const constantRoutes = [
         meta: { title: 'Echart', icon: 'edit' }
       }
     ]
+  },
+  {
+    path: '/animation',
+    component: Layout,
+    redirect: '/animation/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/animation/index'),
+        name: 'Animation',
+        meta: { title: 'Animation', icon: 'edit' }
+      }
+    ]
   }
 ]
 

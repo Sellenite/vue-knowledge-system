@@ -2,11 +2,11 @@
   <section class="app-main">
     <transition v-if="routerAnimation" name="fade-transform" mode="out-in">
       <keep-alive :include="cachedViews">
-        <router-view :key="key" />
+        <router-view :key="key" class="router-view" />
       </keep-alive>
     </transition>
     <keep-alive v-else :include="cachedViews">
-      <router-view :key="key" />
+      <router-view :key="key" class="router-view" />
     </keep-alive>
   </section>
 </template>
@@ -34,16 +34,20 @@ export default {
 
 <style lang="scss" scoped>
 .app-main {
-  /* 50= navbar  50  */
+  /* 50 = navbar */
   min-height: calc(100vh - 50px);
   width: 100%;
   position: relative;
   overflow: hidden;
-  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  & > .router-view {
+    padding: 10px;
+  }
 }
 
 .fixed-header+.app-main {
-  padding-top: 60px;
+  top: 50px;
 }
 
 .hasTagsView {
@@ -53,9 +57,10 @@ export default {
   }
 
   .fixed-header+.app-main {
-    padding-top: 94px;
+    top: 84px;
   }
 }
+
 </style>
 
 <style lang="scss">
