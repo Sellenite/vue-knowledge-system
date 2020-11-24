@@ -1,19 +1,44 @@
 <template>
   <div>
     <div id="echart_container_1" />
+    <pie :data="pieData" />
   </div>
 </template>
 
 <script>
-// import mockData from './data.js';
+import Pie from '@/components/Pie';
 
 const echarts = require('echarts');
 
 export default {
   name: 'Echart',
+  components: {
+    Pie
+  },
   data() {
     return {
-
+      pieData: [
+        {
+          name: '测试1',
+          num: 10,
+          color: '#9287E7'
+        },
+        {
+          name: '测试2',
+          num: 25,
+          color: '#FF7B7B'
+        },
+        {
+          name: '测试3',
+          num: 60,
+          color: '#FEB64D'
+        },
+        {
+          name: '测试4',
+          num: 15,
+          color: '#49D6A5'
+        }
+      ]
     }
   },
   created() {

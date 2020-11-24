@@ -98,19 +98,6 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/algorithms',
-    component: Layout,
-    redirect: '/algorithms/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/algorithms/index'),
-        name: 'Algorithms',
-        meta: { title: 'Algorithms', icon: 'excel' }
-      }
-    ]
-  },
-  {
     path: '/complex-table',
     component: Layout,
     redirect: '/complex-table/index',
@@ -120,6 +107,19 @@ export const constantRoutes = [
         component: () => import('@/views/complex-table/index'),
         name: 'ComplexTable',
         meta: { title: 'ComplexTable', icon: 'edit' }
+      }
+    ]
+  },
+  {
+    path: '/algorithms',
+    component: Layout,
+    redirect: '/algorithms/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/algorithms/index'),
+        name: 'Algorithms',
+        meta: { title: 'Algorithms', icon: 'excel' }
       }
     ]
   },
