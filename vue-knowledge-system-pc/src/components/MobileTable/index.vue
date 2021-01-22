@@ -483,6 +483,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+table,
+tr,
+td,
+th {
+  border: none;
+  border-collapse: collapse;
+  word-break: keep-all;
+  white-space: nowrap;
+  text-align: center;
+}
+
 table {
   width: 100%;
   text-align: center;
