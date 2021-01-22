@@ -1,132 +1,141 @@
 <template>
-  <div>
-    <div>
-      <el-table :data="table" :span-method="objectSpanMethod" border style="width: 100%">
-        <el-table-column prop="checkRoom" label="检查室" />
-        <el-table-column prop="checkProject" label="检查项目" />
-        <el-table-column prop="checkMoney" label="检查费用" />
-        <el-table-column prop="attention" label="注意事项" />
-        <el-table-column prop="appointmentTime" label="预约日期" />
-      </el-table>
-    </div>
-    <div style="margin-top: 60px;">
-      <el-table :data="dragTable" :span-method="objectSpanMethod" border style="width: 100%">
-        <el-table-column type="index" />
-        <el-table-column prop="code" label="产品编码" min-width="150" />
-        <el-table-column prop="type" label="产品型号" min-width="100" />
-        <el-table-column label="2020-02">
-          <!-- prop的定义可以在scope.column.property里得出，知道自己点了哪个column -->
-          <el-table-column v-for="(item, index) in monthColumn" :key="index" :prop="item.date" :label="item.date.substring(8)" width="36">
-            <template slot-scope="scope">
-              <!-- 将属性写在dataset里，作为拖拽多选的时候的依据 -->
-              <div class="inline-square" :class="{ 'active': scope.row[scope.column.property] }" :data-code="scope.row.code" :data-date="scope.column.property" :date-index="scope.$index" @click="clickSquare(scope)" />
-            </template>
-          </el-table-column>
-        </el-table-column>
-      </el-table>
-    </div>
-  </div>
+<div>
+  <el-table
+    :data="tableData"
+    style="width: 100%;margin-bottom: 20px;"
+    row-key="id"
+    border
+    default-expand-all
+    :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+    <el-table-column
+      type="selection"
+      width="55">
+    </el-table-column>
+    <el-table-column
+      prop="date"
+      label="日期"
+      sortable
+      width="180">
+    </el-table-column>
+    <el-table-column
+      prop="name"
+      label="姓名"
+      sortable
+      width="180">
+    </el-table-column>
+    <el-table-column
+      prop="address"
+      label="地址">
+    </el-table-column>
+  </el-table>
+
+  <el-table
+    :data="tableData1"
+    style="width: 100%"
+    row-key="id"
+    border
+    lazy
+    :load="load"
+    :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+    <el-table-column
+      type="selection"
+      width="55">
+    </el-table-column>
+    <el-table-column
+      prop="date"
+      label="日期"
+      width="180">
+    </el-table-column>
+    <el-table-column
+      prop="name"
+      label="姓名"
+      width="180">
+    </el-table-column>
+    <el-table-column
+      prop="address"
+      label="地址">
+    </el-table-column>
+  </el-table>
+</div>
 </template>
-
 <script>
-import { mergeTableVerticalRow } from '@/utils/table.js';
-import _ from 'lodash';
-export default {
-  // name: 'ComplexTable',
-  data() {
-    return {
-      table: [
-        {
-          id: '1',
-          checkRoom: 'CTROOM',
-          checkProject: '颈椎MRICT',
-          checkMoney: '300.22',
-          attention: '检查前空腹',
-          appointmentTime: '2019-5-29 12：30'
-        },
-        {
-          id: '1',
-          checkRoom: 'CTROOM',
-          checkProject: '颈椎MRICT1',
-          checkMoney: '303.22',
-          attention: '检查前空腹',
-          appointmentTime: '2019-5-29 11：30'
-        },
-        {
-          id: '1',
-          checkRoom: 'CTROOM3',
-          checkProject: '颈椎MRICT22',
-          checkMoney: '340.22',
-          attention: '检查前空腹',
-          appointmentTime: '2019-5-29 10：30'
-        },
-        {
-          id: '1',
-          checkRoom: 'DR',
-          checkProject: '鼻骨',
-          checkMoney: '500.22',
-          attention: '检查前空腹',
-          appointmentTime: '2019-5-29 09：30'
-        }
-      ],
-      dragTable: [],
-      monthColumn: []
-    };
-  },
-  created() {
-    // 给table赋值，重新遍历新增rowSpan属性，checkRoom，appointmentTime为table里面需要合并的属性名称
-    this.table = mergeTableVerticalRow(this.table, ['checkRoom', 'appointmentTime'])
-    this.dragTable = this.formatDragDableData();
-  },
-  methods: {
-    objectSpanMethod({ row, column, rowIndex, columnIndex }) {
-      const span = column.property + '-span'
-      if (row[span]) {
-        return row[span]
+  export default {
+    data() {
+      return {
+        tableData: [{
+          id: 1,
+          date: '2016-05-02',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }, {
+          id: 2,
+          date: '2016-05-04',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1517 弄'
+        }, {
+          id: 3,
+          date: '2016-05-01',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1519 弄',
+          children: [{
+              id: 31,
+              date: '2016-05-01',
+              name: '王小虎',
+              address: '上海市普陀区金沙江路 1519 弄'
+            }, {
+              id: 32,
+              date: '2016-05-01',
+              name: '王小虎',
+              address: '上海市普陀区金沙江路 1519 弄'
+          }]
+        }, {
+          id: 4,
+          date: '2016-05-03',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1516 弄'
+        }],
+        tableData1: [{
+          id: 1,
+          date: '2016-05-02',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }, {
+          id: 2,
+          date: '2016-05-04',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1517 弄'
+        }, {
+          id: 3,
+          date: '2016-05-01',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1519 弄',
+          hasChildren: true
+        }, {
+          id: 4,
+          date: '2016-05-03',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1516 弄'
+        }]
       }
     },
-    formatDragDableData() {
-      const monthData = [];
-      for (let i = 1; i < 29 + 1; i++) {
-        let num = i;
-        if (num < 10) {
-          num = '0' + num;
-        }
-        monthData.push({
-          date: `2020-02-${num}`,
-          value: 0
-        })
+    methods: {
+      load(tree, treeNode, resolve) {
+        setTimeout(() => {
+          resolve([
+            {
+              id: 31,
+              date: '2016-05-01',
+              name: '王小虎',
+              address: '上海市普陀区金沙江路 1519 弄'
+            }, {
+              id: 32,
+              date: '2016-05-01',
+              name: '王小虎',
+              address: '上海市普陀区金沙江路 1519 弄'
+            }
+          ])
+        }, 1000)
       }
-      this.monthColumn = _.cloneDeep(monthData);
-      return [
-        {
-          code: 'LS01RCAX4A002',
-          type: 'RAX4A'
-        },
-        {
-          code: 'LS140PJ8K1A003',
-          type: 'LS158K1'
-        }
-      ]
     },
-    clickSquare(scope) {
-      // scope.row[scope.column.property] = !scope.row[scope.column.property];
-      this.$set(scope.row, scope.column.property, !scope.row[scope.column.property]); // 必须这样才能够刷新layout
-      console.log(scope);
-    }
   }
-}
 </script>
-
-<style lang="scss" scoped>
-  .inline-square {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    &.active {
-      background: red;
-    }
-  }
-</style>
