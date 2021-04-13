@@ -148,6 +148,19 @@ export const constantRoutes = [
         meta: { title: 'Animation', icon: 'edit' }
       }
     ]
+  },
+  {
+    path: '/slots',
+    component: Layout,
+    redirect: '/slots/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/slots/index'),
+        name: 'Slots',
+        meta: { title: 'Slots', icon: 'edit' }
+      }
+    ]
   }
 ]
 

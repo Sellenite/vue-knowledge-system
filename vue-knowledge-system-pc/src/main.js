@@ -23,6 +23,8 @@ import * as filters from '@/filters' // global filters
 
 import ElTableColumnFit from '@/components/Table/el-table-column-fit.vue';
 
+import watermark from '@/utils/watermark.js';
+
 Vue.use(Element, {
   size: Cookies.get('size') || 'mini' // set element-ui default size
 })
@@ -35,6 +37,8 @@ Object.keys(filters).forEach(key => {
 })
 
 Vue.config.productionTip = false
+
+watermark.set(['yuuhei'])
 
 new Vue({
   el: '#app',

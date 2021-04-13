@@ -60,6 +60,7 @@
 </template>
 <script>
   export default {
+    name: 'ComplexTable',
     data() {
       return {
         tableData: [{
