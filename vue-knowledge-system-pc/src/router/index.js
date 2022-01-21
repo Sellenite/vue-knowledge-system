@@ -136,6 +136,19 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/low-code-platform',
+    component: Layout,
+    redirect: '/low-code-platform/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/low-code-platform/index'),
+        name: 'LowCodePlatform',
+        meta: { title: 'LowCodePlatform', icon: 'edit' }
+      }
+    ]
+  },
 ]
 
 /**
