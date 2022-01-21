@@ -40,7 +40,7 @@
           </tbody>
         </table>
         <!-- 左侧固定table -->
-        <div v-show="leftFixedHead.length || leftFixedCol.length" class="fixed-area-left" :class="{ 'horizon-scrolling': isHorizonScroll }">
+        <div v-show="leftFixedHead.length || leftFixedCol.length" ref="leftFixedTableWrapper" class="fixed-area-left" :class="{ 'horizon-scrolling': isHorizonScroll }">
           <table ref="leftFixedTable">
             <thead>
               <tr v-for="(row, rowIndex) in leftFixedHead" :key="rowIndex" class="mobile-list-item head">
@@ -231,11 +231,19 @@ export default {
     }
   },
   mounted() {
+    // 处理左右滑动时，左侧需要固定
+    function handleFixedLeftArea(x) {
+      if (this.leftFixedHead.length || this.leftFixedCol.length) {
+        this.$refs.leftFixedTableWrapper.style.transform = `translateZ(3px) translateX(${x}px)`
+      }
+    }
+
     // 有头部固定的时候比较复杂，套用的时候需要滚动联动
     if (this.headFixed) {
       this.$refs.wrapper.addEventListener('scroll', e => {
         const x = e.target.scrollLeft;
         this.$refs.topFixedTable.style.transform = `translateX(${-x}px)`;
+        handleFixedLeftArea.call(this, x)
         if (x !== 0) {
           this.isHorizonScroll = true;
         } else {
@@ -245,6 +253,7 @@ export default {
     } else {
       this.$refs.wrapper.addEventListener("scroll", e => {
         const x = e.target.scrollLeft;
+        handleFixedLeftArea.call(this, x)
         if (x !== 0) {
           this.isHorizonScroll = true;
         } else {

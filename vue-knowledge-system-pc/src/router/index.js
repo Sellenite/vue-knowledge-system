@@ -136,32 +136,6 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/animation',
-    component: Layout,
-    redirect: '/animation/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/animation/index'),
-        name: 'Animation',
-        meta: { title: 'Animation', icon: 'edit' }
-      }
-    ]
-  },
-  {
-    path: '/slots',
-    component: Layout,
-    redirect: '/slots/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/slots/index'),
-        name: 'Slots',
-        meta: { title: 'Slots', icon: 'edit' }
-      }
-    ]
-  }
 ]
 
 /**

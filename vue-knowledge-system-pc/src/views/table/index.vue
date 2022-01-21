@@ -1,9 +1,11 @@
 <template>
   <div class="table-page">
     <pc-table :data="tableData" :column-config="columnConfig" />
+    <div style="text-align: center;margin: 10px">使用了BScroll</div>
     <div style="width: 375px; height: 667px; margin: 20px auto; box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); overflow: auto;">
       <mobile-table height="100%" head-fixed :reserved="false" :data="mobileTableData" :head-config="mobileHeadConfig" :column-config="mobileColumnConfig" remote :load="handleMobileTableLoadTreeNode" />
     </div>
+    <div style="text-align: center;margin: 10px">使用了原生滚动</div>
     <div style="width: 375px; height: 667px; margin: 20px auto; box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); overflow: auto;">
       <mobile-native-table height="100%" head-fixed :reserved="false" :data="mobileTableData" :head-config="mobileHeadConfig" :column-config="mobileColumnConfig" remote :load="handleMobileTableLoadTreeNode" />
     </div>
