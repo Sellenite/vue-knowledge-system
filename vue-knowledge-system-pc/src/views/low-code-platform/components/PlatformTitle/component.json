@@ -1,0 +1,17 @@
+{
+  "component": "PlatformTitle",
+  "desc": "标题",
+  "fields": [
+    {
+      "title": "标题区域",
+      "schema": [
+        {
+          "type": "SchemaString",
+          "model": "title",
+          "label": "label",
+          "value": "value"
+        }
+      ]
+    }
+  ]
+}

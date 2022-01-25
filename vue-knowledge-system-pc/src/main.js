@@ -24,12 +24,14 @@ import * as filters from '@/filters' // global filters
 import ElTableColumnFit from '@/components/Table/el-table-column-fit.vue';
 
 import watermark from '@/utils/watermark.js';
+import draggable from "vuedraggable";
 
 Vue.use(Element, {
   size: Cookies.get('size') || 'mini' // set element-ui default size
 })
 
 Vue.component('el-table-column-fit', ElTableColumnFit);
+Vue.component("draggable", draggable);
 
 // register global utility filters
 Object.keys(filters).forEach(key => {
