@@ -1,24 +1,44 @@
 <template>
   <div class="selector-list">
-    <div v-for="(item, index) in list" :key="index" class="selector-list-item">
+    <div v-for="(item, index) in platform.listComponents" :key="index" class="selector-list-item" draggable @dragstart="handleDragStart($event, item)" @dragend="handleDragEnd($event, item)">
       <span>{{ item.desc }}</span>
     </div>
   </div>
 </template>
 
 <script>
+  import _ from 'lodash';
+  import { getRandomCode } from '@/utils/index.js'
+
   export default {
     name: 'SelectorList',
-    props: {
-      list: {
-        type: Array,
-        default: () => []
-      }
-    },
+    inject: ['platform'],
     data() {
       return {
 
       }
+    },
+    methods: {
+      handleDragStart(event, item) {
+        const component = this._getNewComponentJson(item)
+        this.platform.dragComponent = component
+        this.platform.isDragging = true
+      },
+      handleDragEnd(event, item) {
+        const waitingIndex = this.platform.currentComponentList.findIndex(item => item.type === 'waiting')
+        if (waitingIndex != null) {
+          this.platform.currentComponentList.splice(waitingIndex, 1, this.platform.dragComponent)
+        }
+
+        this.platform.dragComponent = null
+        this.platform.isDragging = false
+      },
+      _getNewComponentJson(item) {
+        const obj = _.cloneDeep(item)
+        obj.id = getRandomCode()
+        return obj
+      },
+
     }
   }
 </script>

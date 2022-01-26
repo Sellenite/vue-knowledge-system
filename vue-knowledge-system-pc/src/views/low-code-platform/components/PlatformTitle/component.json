@@ -9,7 +9,7 @@
           "type": "SchemaString",
           "model": "title",
           "label": "label",
-          "value": "value"
+          "value": "标题内容"
         }
       ]
     }

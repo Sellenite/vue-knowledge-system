@@ -5,6 +5,7 @@
 <script>
   export default {
     name: 'PageConfig',
+    inject: ['platform'],
     data() {
       return {
 

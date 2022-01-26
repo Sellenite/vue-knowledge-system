@@ -1,6 +1,6 @@
 <template>
   <div class="platform-title">
-    {{ title }}
+    <span>{{ title }}</span>
   </div>
 </template>
 
@@ -21,8 +21,8 @@
   }
 </script>
 
-<style lang="" scoped>
+<style lang="scss" scoped>
   .platform-title {
-    
+    font-size: 16px;
   }
 </style>
