@@ -1,9 +1,11 @@
 export default {
   props: {
-    id: '',
     value: '',
     label: '',
-    labelWidth: '',
+    labelWidth: {
+      type: Number,
+      default: 70
+    },
     options: {
       type: Object,
       default: () => {}

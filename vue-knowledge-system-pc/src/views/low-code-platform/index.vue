@@ -7,7 +7,7 @@
       <editor></editor>
     </div>
     <div class="right">
-      <schema-content></schema-content>
+      <schema-content v-if="activatedComponent"></schema-content>
     </div>
   </div>
 </template>
@@ -32,25 +32,31 @@ function register (context) {
   })
 }
 
-const componentsFiles = require.context('@/views/low-code-platform/components', true, /component.json$/)
+const componentsJsonFiles = require.context('@/views/low-code-platform/components', true, /component.json$/)
+const componentsVueFiles = require.context('@/views/low-code-platform/components', true, /index.vue$/)
 
 const listComponents = []
 
-componentsFiles.keys().forEach(key => {
-  const obj = _.cloneDeep(componentsFiles(key))
-  obj.props = {}
-  const fields = obj.fields || []
+componentsJsonFiles.keys().forEach(key => {
+  const json = _.cloneDeep(componentsJsonFiles(key))
+  const component = componentsVueFiles(key.replace('component.json', 'index.vue')).default
+  // 使用vue组件里的name作为component
+  json.component = component.name
+  json.props = {}
+  const fields = json.fields || []
   fields.forEach(field => {
     const schema = field.schema || []
     schema.forEach(schema => {
-      obj.props[schema.model] = schema.value
+      json.props[schema.model] = schema.value
     })
   })
 
-  listComponents.push(obj)
+  listComponents.push(json)
 })
 
 register(require.context('@/views/low-code-platform/components', true, /index.vue/))
+
+register(require.context('@/views/low-code-platform/schema-components/schema', true, /index.vue/))
 
 export default {
   name: 'LowCodePlatform',

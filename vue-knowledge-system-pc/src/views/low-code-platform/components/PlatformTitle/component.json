@@ -1,15 +1,17 @@
 {
-  "component": "PlatformTitle",
   "desc": "标题",
   "fields": [
     {
-      "title": "标题区域",
+      "title": "标题内容",
       "schema": [
         {
           "type": "SchemaString",
           "model": "title",
-          "label": "label",
-          "value": "标题内容"
+          "label": "标题",
+          "value": "LEADING SERIES",
+          "options": {
+            "placeholder": "请输入"
+          }
         }
       ]
     }

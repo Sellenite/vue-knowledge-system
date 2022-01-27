@@ -12,7 +12,7 @@
   import SchemaMixin from '@/views/low-code-platform/schema-components/mixins.js'
 
   export default {
-    name: '',
+    name: 'SchemaString',
     components: {
       ConfigItem
     },
@@ -21,10 +21,13 @@
       return {
 
       }
+    },
+    mounted() {
+      console.log(this.innerOptions)
     }
   }
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 
 </style>

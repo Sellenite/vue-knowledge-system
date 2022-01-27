@@ -4,18 +4,16 @@
     <div class="scroll-area" type="editor">
       <draggable v-model="platform.currentComponentList">
         <template v-for="(item, index) in platform.currentComponentList">
-          <div :key="index">
+          <div :key="item.id" :id="item.id" class="draggable-item">
             <!-- waiting -->
             <div class="waiting" v-if="item.type == 'waiting'" type="waiting">
               <span class="waiting-text">组件放置区域</span>
             </div>
 
             <!-- component -->
-            <div v-else type="component" :data-index="index" class="component-wrapper" @click="setActivatedComponent(item)">
-              <div :class="[platform.dragComponent ? 'event-none' : '']">
-                <component :is="item.component" v-bind="item.props"></component>
-              </div>
-            </div>
+            <shape v-else type="component" :data-index="index" :item="item">
+              <component :is="item.component" v-bind="item.props"></component>
+            </shape>
           </div>
         </template>
       </draggable>
@@ -24,9 +22,15 @@
 </template>
 
 <script>
+  import Shape from '@/views/low-code-platform/layout/Shape.vue';
+  import { getRandomCode } from '@/utils/index.js'
+
   export default {
     name: 'Editor',
     inject: ['platform'],
+    components: {
+      Shape
+    },
     data() {
       return {
         waitingIndex: 0,
@@ -47,17 +51,17 @@
           }
         }
       },
-      setActivatedComponent(item) {
-        this.platform.activatedComponent = item
+      _getWaitingModel() {
+        return {
+          type: 'waiting',
+          id: getRandomCode()
+        }
       },
       handleDragOver(e) {
         e.preventDefault()
         e.stopPropagation()
 
         const type = e.target.getAttribute('type')
-        const waitingModel = {
-          type: 'waiting'
-        }
 
         if (type === 'waiting') return
 
@@ -66,7 +70,7 @@
         if (type === 'editor') {
           if (this.platform.isDragging && !haveWaiting) {
             this.waitingIndex = this.platform.currentComponentList.length
-            this.platform.currentComponentList.push(waitingModel)
+            this.platform.currentComponentList.push(this._getWaitingModel())
           }
         }
 
@@ -89,9 +93,9 @@
     position: relative;
     margin: 10px auto 50px auto;
     box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1);
-    font-size: 0;
     display: flex;
     flex-direction: column;
+    line-height: 1;
     .phone-head {
       width: 100%;
       height: 64px;
@@ -113,7 +117,6 @@
           background: #5487df;
           color: #fff;
           font-size: 12px;
-          pointer-events: none;
           line-height: 1;
         }
       }
