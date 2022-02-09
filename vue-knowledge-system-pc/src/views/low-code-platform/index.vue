@@ -46,8 +46,8 @@ componentsJsonFiles.keys().forEach(key => {
   const fields = json.fields || []
   fields.forEach(field => {
     const schema = field.schema || []
-    schema.forEach(schema => {
-      json.props[schema.model] = schema.value
+    schema.forEach(item => {
+      json.props[item.model] = item.value
     })
   })
 

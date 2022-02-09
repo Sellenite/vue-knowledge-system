@@ -33,33 +33,39 @@
     },
     data() {
       return {
-        waitingIndex: 0,
-        fn: this._throttle(this.handleDragOver, 200)
+
       }
     },
     methods: {
-      // 节流
-      _throttle (fn, delay) {
-        let prev = Date.now()
-
-        return function () {
-          let now = Date.now()
-          let args = arguments
-          if (now - prev > delay) {
-            fn(...args)
-            prev = Date.now()
-          }
-        }
-      },
       _getWaitingModel() {
         return {
           type: 'waiting',
           id: getRandomCode()
         }
       },
+      _getAttributeElement(target, attribute) {
+        let parent = target.parentElement
+        let ret = null
+
+        while (parent != null && !ret) {
+          const type = parent.getAttribute('type')
+          if (type === 'component') {
+            ret = parent
+          } else {
+            parent = parent.parentElement
+          }
+        }
+
+        return ret
+      },
       handleDragOver(e) {
         e.preventDefault()
         e.stopPropagation()
+
+        // 移动Editor排序时也会触发dragover
+        if (!this.platform.dragComponent) {
+          return
+        }
 
         const type = e.target.getAttribute('type')
 
@@ -69,13 +75,40 @@
 
         if (type === 'editor') {
           if (this.platform.isDragging && !haveWaiting) {
-            this.waitingIndex = this.platform.currentComponentList.length
             this.platform.currentComponentList.push(this._getWaitingModel())
           }
+          return
         }
 
-        if (type === 'component') {
+        const componentTarget = this._getAttributeElement(e.target, 'component')
 
+        if (componentTarget) {
+          const [offsetY, offsetHeight, curIndex] = [e.offsetY, componentTarget.offsetHeight, componentTarget.dataset.index]
+          if (offsetY >= 0) {
+            let direction = offsetY < offsetHeight / 2 ? 'top' : 'down'
+
+            const setWaiting = () => {
+              if (direction === 'top') {
+                if (curIndex == 0) {
+                  this.platform.currentComponentList.unshift(this._getWaitingModel())
+                } else {
+                  this.platform.currentComponentList.splice(curIndex, 0, this._getWaitingModel())
+                }
+              } else {
+                const nextIndex = +curIndex + 1
+                this.platform.currentComponentList.splice(nextIndex, 0, this._getWaitingModel())
+              }
+            }
+
+            if (!haveWaiting) {
+              setWaiting()
+            } else {
+              const waitingIndex = this.platform.currentComponentList.findIndex(item => item.type === 'waiting')
+              this.platform.currentComponentList.splice(waitingIndex, 1)
+              setWaiting()
+            }
+          }
+          return
         }
       },
       handleDrop(e) {
