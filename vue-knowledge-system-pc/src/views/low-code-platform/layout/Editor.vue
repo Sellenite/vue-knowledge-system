@@ -33,7 +33,7 @@
     },
     data() {
       return {
-
+        watingIndex: 0
       }
     },
     methods: {
@@ -75,6 +75,7 @@
 
         if (type === 'editor') {
           if (this.platform.isDragging && !haveWaiting) {
+            this.watingIndex = this.platform.currentComponentList.length
             this.platform.currentComponentList.push(this._getWaitingModel())
           }
           return
@@ -84,28 +85,39 @@
 
         if (componentTarget) {
           const [offsetY, offsetHeight, curIndex] = [e.offsetY, componentTarget.offsetHeight, componentTarget.dataset.index]
+
           if (offsetY >= 0) {
             let direction = offsetY < offsetHeight / 2 ? 'top' : 'down'
 
-            const setWaiting = () => {
+            if (!haveWaiting) {
               if (direction === 'top') {
                 if (curIndex == 0) {
                   this.platform.currentComponentList.unshift(this._getWaitingModel())
                 } else {
                   this.platform.currentComponentList.splice(curIndex, 0, this._getWaitingModel())
                 }
+                this.watingIndex = curIndex
               } else {
                 const nextIndex = +curIndex + 1
                 this.platform.currentComponentList.splice(nextIndex, 0, this._getWaitingModel())
+                this.watingIndex = nextIndex
               }
-            }
-
-            if (!haveWaiting) {
-              setWaiting()
             } else {
-              const waitingIndex = this.platform.currentComponentList.findIndex(item => item.type === 'waiting')
-              this.platform.currentComponentList.splice(waitingIndex, 1)
-              setWaiting()
+              let isWaiting
+              if (direction === 'top') {
+                let i = curIndex == 0 ? 0 : curIndex - 1
+                isWaiting = this.platform.currentComponentList[i].type == 'waiting'
+              } else {
+                let i = +curIndex + 1
+                isWaiting = this.platform.currentComponentList.length > i && this.platform.currentComponentList[i].type == 'waiting'
+              }
+
+              if (isWaiting) return
+
+              const temp = this.platform.currentComponentList.splice(this.watingIndex, 1)
+              this.platform.currentComponentList.splice(curIndex, 0, temp[0])
+
+              this.watingIndex = curIndex
             }
           }
           return

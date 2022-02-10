@@ -1,6 +1,7 @@
 export default {
   props: {
     value: '',
+    model: '',
     label: '',
     labelWidth: {
       type: Number,
@@ -13,11 +14,11 @@ export default {
   },
 
   created() {
-    console.log(`${this.$options.name} is created`)
+    console.log(`${this.$options.name} - [${this.model}] is created`)
   },
 
   destroyed() {
-    console.log(`${this.$options.name} is destroyed`)
+    console.log(`${this.$options.name} - [${this.model}] is destroyed`)
   },
 
   data() {

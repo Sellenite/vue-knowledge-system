@@ -2,7 +2,7 @@
   "desc": "标题",
   "fields": [
     {
-      "title": "标题内容",
+      "title": "基础内容",
       "schema": [
         {
           "type": "SchemaString",
@@ -11,6 +11,29 @@
           "value": "LEADING SERIES",
           "options": {
             "placeholder": "请输入"
+          }
+        }
+      ]
+    },
+    {
+      "title": "样式修改",
+      "schema": [
+        {
+          "type": "SchemaNumber",
+          "model": "paddingTop",
+          "label": "上间距",
+          "value": 10,
+          "options": {
+            "min": 10
+          }
+        },
+        {
+          "type": "SchemaNumber",
+          "model": "paddingBottom",
+          "label": "下间距",
+          "value": 10,
+          "options": {
+            "min": 10
           }
         }
       ]

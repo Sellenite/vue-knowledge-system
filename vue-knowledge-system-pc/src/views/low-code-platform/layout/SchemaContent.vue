@@ -6,7 +6,7 @@
       </div>
       <div class="schema-config-list">
         <template v-for="(item, index) in field.schema">
-          <component :is="item.type" v-model="platform.activatedComponent.props[item.model]" :label="item.label" :label-width="item.labelWidth" :options="item.options" @input="handleInput(item, arguments)"></component>
+          <component :is="item.type" v-model="platform.activatedComponent.props[item.model]" :model="item.model" :label="item.label" :label-width="item.labelWidth" :options="item.options" @input="handleInput(item, arguments)"></component>
         </template>
       </div>
     </div>

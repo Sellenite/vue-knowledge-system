@@ -20,6 +20,20 @@ import SchemaContent from '@/views/low-code-platform/layout/SchemaContent.vue'
 import SelectorList from '@/views/low-code-platform/layout/SelectorList.vue'
 import _ from 'lodash'
 
+function getFormalStyle (obj = {}) {
+  // 数字类型可以做些rem的统一处理
+  const style = {}
+  Object.keys(obj).forEach(key => {
+    if (typeof obj[key] === 'number') {
+      style[key] = obj[key] + 'px'
+    } else {
+      style[key] = obj[key]
+    }
+  })
+
+  return style
+}
+
 function register (context) {
   context.keys().forEach(cnt => {
     const component = context(cnt)
@@ -82,6 +96,9 @@ export default {
   },
   created() {
 
+  },
+  methods: {
+    getFormalStyle: getFormalStyle
   }
 }
 </script>
