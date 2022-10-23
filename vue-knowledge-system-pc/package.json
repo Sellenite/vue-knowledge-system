@@ -37,7 +37,7 @@
     "@babel/register": "7.0.0",
     "@vue/cli-plugin-babel": "3.5.3",
     "@vue/cli-plugin-eslint": "^3.9.1",
-    "@vue/cli-plugin-unit-jest": "3.5.3",
+    "@vue/cli-plugin-unit-jest": "5.0.8",
     "@vue/cli-service": "3.5.3",
     "autoprefixer": "^9.5.1",
     "babel-core": "7.0.0-bridge.0",
