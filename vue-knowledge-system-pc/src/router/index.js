@@ -149,6 +149,19 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/antv',
+    component: Layout,
+    redirect: '/antv/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/antv/index'),
+        name: 'Antv',
+        meta: { title: 'antv', icon: 'edit' }
+      }
+    ]
+  },
 ]
 
 /**
