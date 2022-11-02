@@ -22,13 +22,13 @@ export default {
         return {
           cardType: type,
           no: 'rw202210230001',
-          title: '系统字段变更',
+          title: 'xq202210231001_测试超长需求测试超长需求测试超长需求',
           productManager: '王语嫣',
           demandAnalyst: '梁珍',
           projectManager: '林庆栋',
           developer: 'yuuhei',
           status: '已发正式库',
-          application: 'GIS地理平台'
+          application: 'GIS地理平台GIS地理平台GIS地理平台GIS地理平台GIS地理平台'
         }
       }
 

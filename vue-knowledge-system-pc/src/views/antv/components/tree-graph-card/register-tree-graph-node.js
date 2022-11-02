@@ -3,7 +3,7 @@ import { registerNode, Util } from '@antv/g6'
 const TREE_GRAPH_CARD_CARD_NAME = 'tree-graph-card-node'
 
 const NODE_WIDTH = 244
-const NODE_HEIGHT = 122 // 高度给一个默认的初始高度，之后节点高度会有变化
+const NODE_HEIGHT = 46 // 高度给一个默认的初始高度，之后节点高度会有变化
 const NODE_TITLE_BOX_HEIGHT = 46
 const NODE_PADDING = [18, 18, 18, 18]
 
@@ -35,19 +35,20 @@ const getNodeConfig = (cfg) => {
 
 // 由于节点的文本不会换行，根据节点的宽度切分详情文本到数组中，然后进行换行
 const getStringLineArr = (str, maxWidth, fontSize) => {
+  const arr = []
   str = str.replace(/\n/gi, '')
-  // 单个字体考虑加上字号+边距
-  const actualLength = Math.floor(maxWidth / (fontSize + 2))
-  let width = Util.getTextSize(str, fontSize)[0]
-  const strArr = []
-  while (width > 0) {
-    const substr = str.substring(0, actualLength)
-    strArr.push(substr)
-    str = str.substring(actualLength)
-    width = Util.getTextSize(str, fontSize)[0]
+  while (str.length > 0) {
+    for (let i = 0; i <= str.length; i++) {
+      const _str = str.substring(0, i)
+      if (Util.getTextSize(_str, fontSize)[0] >= maxWidth || i === str.length) {
+        arr.push(_str)
+        str = str.substring(i)
+        break
+      }
+    }
   }
 
-  return strArr
+  return arr
 }
 
 // 渲染节点方法集合
@@ -130,6 +131,7 @@ const nodeBasicMethod = {
     const config = getNodeConfig(cfg)
     const subTitleGroup = group.addGroup({ name: 'node-sub-title-group' })
     const subTitleFontSize = 14
+    const subTitleLineHeight = 18
     const subTitleMarginBottom = 14
     const iconText = '普通'
     const iconTextFontSize = 12
@@ -138,22 +140,26 @@ const nodeBasicMethod = {
     const iconTextBoxHeight = iconTextSizeArr[1] + 6
     const iconTextBoxMarginRight = 8
     // 子标题
+    const textArr = getStringLineArr(cfg.title, NODE_WIDTH - NODE_PADDING[1] - NODE_PADDING[3], subTitleFontSize)
+    const processText = textArr.join('\n')
+    const textHeight = textArr.length * subTitleLineHeight
     subTitleGroup.addShape('text', {
       attrs: {
+        text: processText,
         x: NODE_PADDING[3],
         y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0],
-        text: cfg.title,
         fontSize: subTitleFontSize,
+        lineHeight: subTitleLineHeight,
         textAlign: 'left',
         textBaseline: 'top',
-        fill: '#333333'
+        fill: '#333333',
       }
     })
     // icon框
     subTitleGroup.addShape('rect', {
       attrs: {
         x: NODE_PADDING[3],
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + subTitleFontSize + subTitleMarginBottom,
+        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom,
         width: iconTextBoxWidth,
         height: iconTextBoxHeight,
         fill: 'rgba(252, 252, 254)',
@@ -165,7 +171,7 @@ const nodeBasicMethod = {
     subTitleGroup.addShape('text', {
       attrs: {
         x: NODE_PADDING[3] + (iconTextBoxWidth / 2) - (iconTextSizeArr[0] / 2),
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + subTitleFontSize + subTitleMarginBottom + (iconTextBoxHeight / 2) - (iconTextSizeArr[1] / 2) + 1,
+        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom + (iconTextBoxHeight / 2) - (iconTextSizeArr[1] / 2) + 1,
         text: iconText,
         fontSize: iconTextFontSize,
         textAlign: 'left',
@@ -177,7 +183,7 @@ const nodeBasicMethod = {
     subTitleGroup.addShape('text', {
       attrs: {
         x: NODE_PADDING[3] + iconTextBoxWidth + iconTextBoxMarginRight,
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + subTitleFontSize + subTitleMarginBottom + (iconTextBoxHeight / 2) - (iconTextSizeArr[1] / 2) + 1,
+        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom + (iconTextBoxHeight / 2) - (iconTextSizeArr[1] / 2) + 1,
         text: cfg.cardType === 'main' ? '主办' : cfg.cardType === 'sub' ? '协办' : '',
         fontSize: iconTextFontSize,
         textAlign: 'left',
@@ -193,7 +199,7 @@ const nodeBasicMethod = {
     expandBtnGroup.addShape('rect', {
       attrs: {
         x: NODE_WIDTH - btnTextBoxWidth - 14,
-        y: NODE_HEIGHT - btnTextBoxHeight - 14,
+        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom,
         width: btnTextBoxWidth,
         height: btnTextBoxHeight,
         fill: '#FFFFFF',
@@ -207,7 +213,7 @@ const nodeBasicMethod = {
     expandBtnGroup.addShape('text', {
       attrs: {
         x: NODE_WIDTH - btnTextBoxWidth - 14 + btnTextBoxWidth / 2,
-        y: NODE_HEIGHT - btnTextBoxHeight - 14 + 1,
+        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom + 1,
         text: btnText,
         textAlign: 'center',
         textBaseline: 'top',
@@ -215,6 +221,15 @@ const nodeBasicMethod = {
         cursor: 'pointer'
       },
       name: 'node-expand-btn-text'
+    })
+    // 增加一个底部的padding
+    subTitleGroup.addShape('rect', {
+      attrs: {
+        x: 0,
+        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom + btnTextBoxHeight,
+        width: NODE_WIDTH,
+        height: NODE_PADDING[2]
+      }
     })
   },
   // 创建详情动态字段
@@ -268,10 +283,10 @@ const nodeBasicMethod = {
       const rowTextLineHeight = 18
       const rowTextFontSize = 12
       // 初始y在标题下方
-      let sumY = NODE_HEIGHT
+      let sumY = group.getBBox().height
       for (const item of arr) {
         const text = `${item.label}：${cfg[item.key]}`
-        const textArr = getStringLineArr(text, NODE_WIDTH, rowTextFontSize)
+        const textArr = getStringLineArr(text, NODE_WIDTH - NODE_PADDING[1] - NODE_PADDING[3], rowTextFontSize)
         const processText = textArr.join('\n')
         const textHeight = textArr.length * rowTextLineHeight
         expandDetailGroup.addShape('text', {
