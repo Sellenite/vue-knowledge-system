@@ -10,15 +10,15 @@ const NODE_PADDING = [18, 18, 18, 18]
 // 返回当前节点需要配置的颜色等配置
 const getNodeConfig = (cfg) => {
   let titleIconBackgroundColor, titleIconFontColor, taskTypeFontColor
-  if (cfg.cardType === 'host') {
+  if (cfg.__cardType === 'host') {
     titleIconBackgroundColor = 'rgba(235, 247, 255)'
     titleIconFontColor = 'rgba(41, 167, 255)'
   } else {
     titleIconBackgroundColor = 'rgba(250, 244, 238)'
     titleIconFontColor = 'rgba(255, 142, 0)'
-    if (cfg.cardType === 'main') {
+    if (cfg.__cardType === 'main') {
       taskTypeFontColor = 'red'
-    } else if (cfg.cardType === 'sub') {
+    } else if (cfg.__cardType === 'sub') {
       taskTypeFontColor = 'blue'
     }
   }
@@ -54,7 +54,7 @@ const getStringLineArr = (str, maxWidth, fontSize) => {
 // 渲染节点方法集合
 const nodeBasicMethod = {
   // 创建外层最大容器作为keyShape
-  createNodeBox: (group) => {
+  createNodeBox(group) {
     // 最外面的大矩形
     const nodeContainer = group.addShape('rect', {
       attrs: {
@@ -73,43 +73,32 @@ const nodeBasicMethod = {
     return nodeContainer
   },
   // 创建标题
-  createNodeTitle: (cfg, group) => {
+  createNodeTitle(cfg, group) {
     const config = getNodeConfig(cfg)
     const titleGroup = group.addGroup({ name: 'node-title-group' })
-    const titleFontSize = 12
-    const titleIconWidth = 22
-    const titleIconHeight = titleIconWidth
-    const titleIconMarginRight = 8
-    // icon框
-    titleGroup.addShape('rect', {
-      attrs: {
-        x: NODE_PADDING[3],
-        y: (NODE_TITLE_BOX_HEIGHT / 2) - (titleIconHeight / 2),
-        width: titleIconWidth,
-        height: titleIconHeight,
-        fill: config.titleIconBackgroundColor,
-        radius: 2
-      }
-    })
-    // icon文字
-    titleGroup.addShape('text', {
-      attrs: {
-        x: NODE_PADDING[3] + (titleIconWidth / 2) - (titleFontSize / 2),
-        y: (NODE_TITLE_BOX_HEIGHT / 2) - (titleIconHeight / 2) + (titleFontSize / 2),
-        text: cfg.cardType === 'host' ? '需' : '认',
-        fontSize: titleFontSize,
-        textAlign: 'left',
-        textBaseline: 'top',
-        fill: config.titleIconFontColor
-      }
+    // icon
+    const iconBoxTextMap = {
+      'host': '需',
+      'main': '任',
+      'sub': '任'
+    }
+    const iconBox = this.createNodeTextBox({
+      x: NODE_PADDING[3],
+      y: 13,
+      text: iconBoxTextMap[cfg.__cardType],
+      fontSize: 12,
+      fontColor: config.titleIconFontColor,
+      fill: config.titleIconBackgroundColor,
+      padding: [4, 4, 4, 4],
+      group: titleGroup
     })
     // title
     titleGroup.addShape('text', {
       attrs: {
-        x: NODE_PADDING[3] + titleIconWidth + titleIconMarginRight,
-        y: (NODE_TITLE_BOX_HEIGHT / 2) - (titleFontSize / 2),
+        x: NODE_PADDING[3] + iconBox.getBBox().width + 8,
+        y: 17,
         text: cfg.no,
-        fontSize: titleFontSize,
+        fontSize: 12,
         textAlign: 'left',
         textBaseline: 'top',
         fill: 'rgba(133, 129, 139)'
@@ -127,64 +116,48 @@ const nodeBasicMethod = {
     })
   },
   // 创建标题下方区域
-  createNodeSubTitle: (cfg, group) => {
+  createNodeSubTitle(cfg, group) {
+    let tempX
+    let tempY
     const config = getNodeConfig(cfg)
     const subTitleGroup = group.addGroup({ name: 'node-sub-title-group' })
     const subTitleFontSize = 14
-    const subTitleLineHeight = 18
-    const subTitleMarginBottom = 14
-    const iconText = '普通'
-    const iconTextFontSize = 12
-    const iconTextSizeArr = Util.getTextSize(iconText, iconTextFontSize)
-    const iconTextBoxWidth = iconTextSizeArr[0] + 10
-    const iconTextBoxHeight = iconTextSizeArr[1] + 6
-    const iconTextBoxMarginRight = 8
     // 子标题
     const textArr = getStringLineArr(cfg.title, NODE_WIDTH - NODE_PADDING[1] - NODE_PADDING[3], subTitleFontSize)
     const processText = textArr.join('\n')
-    const textHeight = textArr.length * subTitleLineHeight
     subTitleGroup.addShape('text', {
       attrs: {
-        text: processText,
         x: NODE_PADDING[3],
         y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0],
+        text: processText,
         fontSize: subTitleFontSize,
-        lineHeight: subTitleLineHeight,
+        lineHeight: 18,
         textAlign: 'left',
         textBaseline: 'top',
         fill: '#333333',
       }
     })
-    // icon框
-    subTitleGroup.addShape('rect', {
-      attrs: {
-        x: NODE_PADDING[3],
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom,
-        width: iconTextBoxWidth,
-        height: iconTextBoxHeight,
-        fill: 'rgba(252, 252, 254)',
-        stroke: 'rgba(235, 235, 235)',
-        radius: 2
-      }
-    })
-    // icon文字
-    subTitleGroup.addShape('text', {
-      attrs: {
-        x: NODE_PADDING[3] + (iconTextBoxWidth / 2) - (iconTextSizeArr[0] / 2),
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom + (iconTextBoxHeight / 2) - (iconTextSizeArr[1] / 2) + 1,
-        text: iconText,
-        fontSize: iconTextFontSize,
-        textAlign: 'left',
-        textBaseline: 'top',
-        fill: '#333333'
-      }
+    tempY = group.getBBox().height + 6
+    // 普通
+    const iconTextFontSize = 12
+    const iconBox = this.createNodeTextBox({
+      x: NODE_PADDING[3],
+      y: tempY,
+      text: '普通',
+      fontSize: iconTextFontSize,
+      fill: 'rgba(252, 252, 254)',
+      padding: [4, 4, 4, 4],
+      stroke: 'rgba(235, 235, 235)',
+      border: 1,
+      group: subTitleGroup
     })
     // 主办/协办
+    const taskTypeText = cfg.__cardType === 'main' ? '主办' : cfg.__cardType === 'sub' ? '协办' : ''
     subTitleGroup.addShape('text', {
       attrs: {
-        x: NODE_PADDING[3] + iconTextBoxWidth + iconTextBoxMarginRight,
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom + (iconTextBoxHeight / 2) - (iconTextSizeArr[1] / 2) + 1,
-        text: cfg.cardType === 'main' ? '主办' : cfg.cardType === 'sub' ? '协办' : '',
+        x: NODE_PADDING[3] + iconBox.getBBox().width + 8,
+        y: tempY + (iconBox.getBBox().height / 2) - (Util.getTextSize(taskTypeText, iconTextFontSize)[1] / 2),
+        text: taskTypeText,
         fontSize: iconTextFontSize,
         textAlign: 'left',
         textBaseline: 'top',
@@ -193,13 +166,13 @@ const nodeBasicMethod = {
     })
     // 展开按钮group
     const expandBtnGroup = group.addGroup({ name: 'node-expand-btn-group' })
-    const btnText = cfg.isShowDetails ? '-' : '+'
+    const btnText = cfg.__isShowDetails ? '-' : '+'
     const btnTextBoxWidth = 14
     const btnTextBoxHeight = 14
     expandBtnGroup.addShape('rect', {
       attrs: {
         x: NODE_WIDTH - btnTextBoxWidth - 14,
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom,
+        y: tempY + 2,
         width: btnTextBoxWidth,
         height: btnTextBoxHeight,
         fill: '#FFFFFF',
@@ -213,8 +186,9 @@ const nodeBasicMethod = {
     expandBtnGroup.addShape('text', {
       attrs: {
         x: NODE_WIDTH - btnTextBoxWidth - 14 + btnTextBoxWidth / 2,
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom + 1,
+        y: tempY + 3,
         text: btnText,
+        fontSize: 14,
         textAlign: 'center',
         textBaseline: 'top',
         fill: '#333333',
@@ -226,15 +200,35 @@ const nodeBasicMethod = {
     subTitleGroup.addShape('rect', {
       attrs: {
         x: 0,
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0] + textHeight + subTitleMarginBottom + btnTextBoxHeight,
+        y: group.getBBox().height,
         width: NODE_WIDTH,
         height: NODE_PADDING[2]
       }
     })
+
   },
   // 创建详情动态字段
-  createNodeExpandDetail: (cfg, group) => {
+  createNodeExpandDetail(cfg, group) {
     const expandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
+    // 顶部线
+    expandDetailGroup.addShape('rect', {
+      attrs: {
+        x: 0,
+        y: group.getBBox().height,
+        width: NODE_WIDTH,
+        height: 1,
+        fill: '#D6D9E0'
+      }
+    })
+    // 顶部padding
+    expandDetailGroup.addShape('rect', {
+      attrs: {
+        x: 0,
+        y: group.getBBox().height,
+        width: NODE_WIDTH,
+        height: NODE_PADDING[2]
+      }
+    })
     const hostInfoArr = [
       {
         key: 'application',
@@ -316,14 +310,14 @@ const nodeBasicMethod = {
       // 记录扩展的高度，便于在graph里进行y坐标位移
       cfg.__expandDetailGroupHeight = expandDetailGroup.getBBox().height
     }
-    if (cfg.cardType === 'host') {
+    if (cfg.__cardType === 'host') {
       handleRenderRow(hostInfoArr)
     } else {
       handleRenderRow(childInfoArr)
     }
   },
   // 创建先去动态字段后导致节点变高，要重新渲染容器的高度样式
-  fitContainerHeight: (cfg, group, type) => {
+  fitContainerHeight(cfg, group, type) {
     const nodeContainer = group.find(e => e.cfg.name === 'node-container')
     if (type === 'expand') {
       const nodeHeight = group.getBBox().height
@@ -332,6 +326,53 @@ const nodeBasicMethod = {
       const nodeHeight = group.getBBox().height - cfg.__expandDetailGroupHeight
       nodeContainer.attr('height', nodeHeight)
     }
+  },
+  // 创建带有文字的rect
+  createNodeTextBox({
+    x = 0,
+    y = 0,
+    text = '',
+    fontSize = 12,
+    fontColor = '#333333',
+    fill = '#FFFFFF',
+    radius = 2,
+    padding = [0, 0, 0, 0, ],
+    stroke = null,
+    border = 0,
+    group
+  }) {
+    if (!group) {
+      return
+    }
+    const fontWidth = Util.getTextSize(text, fontSize)[0]
+    const fontHeight = Util.getTextSize(text, fontSize)[1]
+    const boxWidth = fontWidth + padding[1] + padding[3]
+    const boxHeight = fontHeight + padding[0] + padding[2]
+    const boxGroup = group.addGroup({ name: `node-text-box-group-${Math.random()}` })
+    boxGroup.addShape('rect', {
+      attrs: {
+        x,
+        y,
+        width: boxWidth,
+        height: boxHeight,
+        fill,
+        radius,
+        stroke,
+        lineWidth: border
+      }
+    })
+    boxGroup.addShape('text', {
+      attrs: {
+        x: x + (boxWidth / 2) - (fontWidth / 2),
+        y: y + (boxHeight / 2) - (fontHeight / 2) + 1,
+        text,
+        fontSize,
+        textAlign: 'left',
+        textBaseline: 'top',
+        fill: fontColor
+      }
+    })
+    return boxGroup
   }
 }
 
@@ -344,7 +385,7 @@ registerNode(
       const expandDetailGroup = group.addGroup({ name: 'node-expand-detail-group' })
       // 创建记录扩展高度后再删除
       nodeBasicMethod.createNodeExpandDetail(cfg, group)
-      if (!cfg.isShowDetails) {
+      if (!cfg.__isShowDetails) {
         expandDetailGroup.clear()
       }
       nodeBasicMethod.fitContainerHeight(cfg, group, 'expand')
@@ -357,8 +398,8 @@ registerNode(
       const expandBtnText = group.find(e => e.cfg.name === 'node-expand-btn-text')
       const expandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
 
-      expandBtnText.attr('text', cfg.isShowDetails ? '-' : '+')
-      if (cfg.isShowDetails) {
+      expandBtnText.attr('text', cfg.__isShowDetails ? '-' : '+')
+      if (cfg.__isShowDetails) {
         nodeBasicMethod.createNodeExpandDetail(cfg, group)
         nodeBasicMethod.fitContainerHeight(model, group, 'expand')
       } else {

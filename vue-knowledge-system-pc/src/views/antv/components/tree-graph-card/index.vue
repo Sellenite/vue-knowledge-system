@@ -3,6 +3,7 @@
 </template>
 <script>
 import { TreeGraph } from '@antv/g6'
+import { treeData } from './data.js'
 import { TREE_GRAPH_CARD_CARD_NAME } from './register-tree-graph-node.js'
 export default {
   data() {
@@ -18,59 +19,15 @@ export default {
   },
   methods: {
     _formatData() {
-      const getChildObj = (type) => {
-        return {
-          cardType: type,
-          no: 'rw202210230001',
-          title: 'xq202210231001_测试超长需求测试超长需求测试超长需求',
-          productManager: '王语嫣',
-          demandAnalyst: '梁珍',
-          projectManager: '林庆栋',
-          developer: 'yuuhei',
-          status: '已发正式库',
-          application: 'GIS地理平台GIS地理平台GIS地理平台GIS地理平台GIS地理平台'
-        }
-      }
-
-      const getMainObj = () => {
-        return {
-          cardType: 'host',
-          no: 'xq202210231001',
-          title: '研发平台GIS需求改造',
-          application: '研发平台',
-          productManager: '周堂发',
-          demandAnalyst: '宋晶晶',
-          status: '已发布',
-          author: '敖翔/研发平台'
-        }
-      }
-
-      const originData = {
-        ...getMainObj(),
-        children: [
-          {
-            ...getChildObj('main'),
-            children: [
-              {
-                ...getChildObj('sub')
-              },
-              {
-                ...getChildObj('sub')
-              }
-            ]
-          },
-          {
-            ...getChildObj('main')
-          }
-        ]
-      }
+      const originData = treeData
 
       const traverse = (data) => {
         const fn = (node, level) => {
           const targetNode = {
             ...node,
-            level: level,
-            isShowDetails: node.cardType === 'host'
+            __level: level,
+            __isShowDetails: node.cardType === 'host',
+            __cardType: node.cardType
           }
           if (node.children && node.children.length > 0) {
             targetNode.children = []
@@ -138,29 +95,27 @@ export default {
         if (e.target.cfg.name === 'node-expand-btn-box' || e.target.cfg.name === 'node-expand-btn-text') {
           // 变更isShowDetails数据
           const model = e.item.getModel()
-          model.isShowDetails = !model.isShowDetails
+          model.__isShowDetails = !model.__isShowDetails
           graph.updateItem(e.item, model)
           // 位于该节点的下方的所有节点的y坐标进行移动
           const currentGroup = graph.findById(model.id)
           const sameLevelGroup = graph.findAll('node', (node) => {
             const _model = node.getModel()
-            return _model.level === model.level
+            return _model.__level === model.__level
           })
           const belowCurrentGroups = sameLevelGroup.slice(sameLevelGroup.indexOf(currentGroup) + 1)
-          if (model.isShowDetails) {
+          if (model.__isShowDetails) {
             // 下移
             belowCurrentGroups.forEach((group) => {
-              const _model = group.getModel()
               graph.updateItem(group, {
-                y: group.getBBox().y + _model.__expandDetailGroupHeight
+                y: group.getBBox().y + model.__expandDetailGroupHeight
               })
             })
           } else {
             // 上移
             belowCurrentGroups.forEach((group) => {
-              const _model = group.getModel()
               graph.updateItem(group, {
-                y: group.getBBox().y - _model.__expandDetailGroupHeight
+                y: group.getBBox().y - model.__expandDetailGroupHeight
               })
             })
           }
