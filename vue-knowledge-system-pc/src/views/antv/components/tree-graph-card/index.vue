@@ -25,12 +25,16 @@ export default {
         const fn = (node, level) => {
           const targetNode = {
             ...node,
+            id: Math.random() + '',
+            collapsed: node.cardType === 'host' ? false : true,
+            children: [],
             __level: level,
             __isShowDetails: node.cardType === 'host',
-            __cardType: node.cardType
+            __cardType: node.cardType,
+            __eventTargetName: null,
+            __nodeHeight: 0,
           }
           if (node.children && node.children.length > 0) {
-            targetNode.children = []
             node.children.forEach((item) => {
               targetNode.children.push(fn(item, level + 1))
             })
@@ -53,6 +57,7 @@ export default {
         container: container,
         width: graphWidth,
         height: graphHeight,
+        animate: false,
         defaultNode: {
           type: TREE_GRAPH_CARD_CARD_NAME,
           anchorPoints: [
@@ -79,10 +84,10 @@ export default {
             return 244
           },
           getHeight: () => {
-            return 122
+            return 46
           },
           getVGap: () => {
-            return 40
+            return 20
           },
           getHGap: () => {
             return 30
@@ -90,35 +95,32 @@ export default {
         }
       })
 
+      window.__treeGraph = graph
+
       graph.on('node:click', (e) => {
         // 点击展开/隐藏详情
-        if (e.target.cfg.name === 'node-expand-btn-box' || e.target.cfg.name === 'node-expand-btn-text') {
-          // 变更isShowDetails数据
+        const expandNameGroup = [
+          'node-expand-btn-box',
+          'node-expand-btn-text'
+        ]
+        if (expandNameGroup.includes(e.target.cfg.name)) {
           const model = e.item.getModel()
+          model.__eventTargetName = 'details'
           model.__isShowDetails = !model.__isShowDetails
           graph.updateItem(e.item, model)
-          // 位于该节点的下方的所有节点的y坐标进行移动
-          const currentGroup = graph.findById(model.id)
-          const sameLevelGroup = graph.findAll('node', (node) => {
-            const _model = node.getModel()
-            return _model.__level === model.__level
-          })
-          const belowCurrentGroups = sameLevelGroup.slice(sameLevelGroup.indexOf(currentGroup) + 1)
-          if (model.__isShowDetails) {
-            // 下移
-            belowCurrentGroups.forEach((group) => {
-              graph.updateItem(group, {
-                y: group.getBBox().y + model.__expandDetailGroupHeight
-              })
-            })
-          } else {
-            // 上移
-            belowCurrentGroups.forEach((group) => {
-              graph.updateItem(group, {
-                y: group.getBBox().y - model.__expandDetailGroupHeight
-              })
-            })
-          }
+        }
+        // 点击展开/隐藏子树
+        const collapsedNameGroup = [
+          'node-collapsed-btn-box',
+          'node-collapsed-btn-text',
+          'node-collapsed-btn-show-text',
+        ]
+        if (collapsedNameGroup.includes(e.target.cfg.name)) {
+          const model = e.item.getModel()
+          model.__eventTargetName = 'collapsed'
+          model.collapsed = !model.collapsed
+          graph.updateItem(e.item, model)
+          graph.layout()
         }
       })
 

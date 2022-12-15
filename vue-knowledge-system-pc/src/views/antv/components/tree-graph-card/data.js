@@ -1,18 +1,18 @@
-const getChildObj = (type) => {
+const getChildObj = ({ type, no }) => {
   return {
     cardType: type,
-    no: 'rw202210230001',
+    no: no,
     title: 'xq202210231001_测试超长需求测试超长需求测试超长需求',
     productManager: '王语嫣',
     demandAnalyst: '梁珍',
     projectManager: '林庆栋',
     developer: 'yuuhei',
     status: '已发正式库',
-    application: 'GIS地理平台GIS地理平台GIS地理平台GIS地理平台GIS地理平台'
+    application: 'GIS地理平台GIS地理平台GIS地理平台GIS地理平台GIS地理平台',
   }
 }
 
-const getMainObj = () => {
+const getHostObj = () => {
   return {
     cardType: 'host',
     no: 'xq202210231001',
@@ -26,21 +26,30 @@ const getMainObj = () => {
 }
 
 const treeData = {
-  ...getMainObj(),
+  ...getHostObj(),
   children: [
     {
-      ...getChildObj('main'),
+      ...getChildObj({ type: 'main', no: 'xq20220329001803' }),
       children: [
         {
-          ...getChildObj('sub')
+          ...getChildObj({ type: 'sub', no: 'xq20220329001804' })
         },
         {
-          ...getChildObj('sub')
+          ...getChildObj({ type: 'sub', no: 'xq20220329001805' })
         }
       ]
     },
     {
-      ...getChildObj('main')
+      ...getChildObj({ type: 'main', no: 'xq20220329001806' })
+    },
+    {
+      ...getChildObj({ type: 'main', no: 'xq20220329001806' })
+    },
+    {
+      ...getChildObj({ type: 'main', no: 'xq20220329001806' })
+    },
+    {
+      ...getChildObj({ type: 'main', no: 'xq20220329001806' })
     }
   ]
 }

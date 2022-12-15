@@ -54,7 +54,7 @@ const getStringLineArr = (str, maxWidth, fontSize) => {
 // 渲染节点方法集合
 const nodeBasicMethod = {
   // 创建外层最大容器作为keyShape
-  createNodeBox(group) {
+  createNodeBox(cfg, group) {
     // 最外面的大矩形
     const nodeContainer = group.addShape('rect', {
       attrs: {
@@ -70,6 +70,7 @@ const nodeBasicMethod = {
       name: 'node-container'
     })
 
+    cfg.__nodeHeight = group.getBBox().height
     return nodeContainer
   },
   // 创建标题
@@ -104,6 +105,67 @@ const nodeBasicMethod = {
         fill: 'rgba(133, 129, 139)'
       }
     })
+    // 展开、收起的
+    const collapsedBtnGroup = titleGroup.addGroup({ name: 'node-collapsed-btn-group' })
+    const btnText = cfg.collapsed ? '+' : '-'
+    const btnTextBoxWidth = 14
+    const btnTextBoxHeight = 14
+    const showTextFontSize = 12
+    let showText
+    if (cfg.collapsed) {
+      if (cfg.children.length) {
+        showText = '展开所有'
+      } else {
+        showText = '展开'
+      }
+    } else {
+      if (cfg.children.length) {
+        showText = '收起所有'
+      } else {
+        showText = '收起'
+      }
+    }
+    const showTextWidth = Util.getTextSize(showText, showTextFontSize)[0]
+    collapsedBtnGroup.addShape('rect', {
+      attrs: {
+        x: NODE_WIDTH - NODE_PADDING[1] / 2 - showTextWidth - btnTextBoxWidth - 6,
+        y: 14,
+        width: btnTextBoxWidth,
+        height: btnTextBoxHeight,
+        fill: '#FFFFFF',
+        lineWidth: 1,
+        stroke: '#AAAAAA',
+        radius: 2,
+        cursor: 'pointer'
+      },
+      name: 'node-collapsed-btn-box'
+    })
+    collapsedBtnGroup.addShape('text', {
+      attrs: {
+        x: NODE_WIDTH - NODE_PADDING[1] / 2 - showTextWidth - btnTextBoxWidth + 1,
+        y: 15,
+        text: btnText,
+        fontSize: 14,
+        textAlign: 'center',
+        textBaseline: 'top',
+        fill: '#AAAAAA',
+        cursor: 'pointer'
+      },
+      name: 'node-collapsed-btn-text'
+    })
+    collapsedBtnGroup.addShape('text', {
+      attrs: {
+        x: NODE_WIDTH - NODE_PADDING[1] / 2 - showTextWidth,
+        y: 16,
+        text: showText,
+        fontSize: showTextFontSize,
+        textAlign: 'left',
+        textBaseline: 'top',
+        fill: '#AAAAAA',
+        cursor: 'pointer'
+      },
+      name: 'node-collapsed-btn-show-text'
+    })
     // 底部线
     titleGroup.addShape('rect', {
       attrs: {
@@ -114,6 +176,7 @@ const nodeBasicMethod = {
         fill: '#D6D9E0'
       }
     })
+    cfg.__nodeHeight = group.getBBox().height
   },
   // 创建标题下方区域
   createNodeSubTitle(cfg, group) {
@@ -165,7 +228,7 @@ const nodeBasicMethod = {
       }
     })
     // 展开按钮group
-    const expandBtnGroup = group.addGroup({ name: 'node-expand-btn-group' })
+    const expandBtnGroup = subTitleGroup.addGroup({ name: 'node-expand-btn-group' })
     const btnText = cfg.__isShowDetails ? '-' : '+'
     const btnTextBoxWidth = 14
     const btnTextBoxHeight = 14
@@ -205,11 +268,11 @@ const nodeBasicMethod = {
         height: NODE_PADDING[2]
       }
     })
-
+    cfg.__nodeHeight = group.getBBox().height
   },
   // 创建详情动态字段
   createNodeExpandDetail(cfg, group) {
-    const expandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
+    const expandDetailGroup = group.addGroup({ name: 'node-expand-detail-group' })
     // 顶部线
     expandDetailGroup.addShape('rect', {
       attrs: {
@@ -307,25 +370,68 @@ const nodeBasicMethod = {
           height: paddingHeight
         }
       })
-      // 记录扩展的高度，便于在graph里进行y坐标位移
-      cfg.__expandDetailGroupHeight = expandDetailGroup.getBBox().height
     }
     if (cfg.__cardType === 'host') {
       handleRenderRow(hostInfoArr)
     } else {
       handleRenderRow(childInfoArr)
     }
+    cfg.__nodeHeight = group.getBBox().height
   },
-  // 创建先去动态字段后导致节点变高，要重新渲染容器的高度样式
-  fitContainerHeight(cfg, group, type) {
+  // 适应自身node的高度
+  fitContainerHeight(cfg, group) {
     const nodeContainer = group.find(e => e.cfg.name === 'node-container')
-    if (type === 'expand') {
-      const nodeHeight = group.getBBox().height
-      nodeContainer.attr('height', nodeHeight)
-    } else {
-      const nodeHeight = group.getBBox().height - cfg.__expandDetailGroupHeight
-      nodeContainer.attr('height', nodeHeight)
+    const nodeTitleGroup = group.find(e => e.cfg.name === 'node-title-group')
+    const nodeSubTitleGroup = group.find(e => e.cfg.name === 'node-sub-title-group')
+    const nodeExpandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
+    let height = 0
+    if (nodeTitleGroup) {
+      height = nodeTitleGroup.getBBox().maxY
     }
+    if (nodeSubTitleGroup) {
+      height = nodeSubTitleGroup.getBBox().maxY
+    }
+    if (nodeExpandDetailGroup) {
+      height = nodeExpandDetailGroup.getBBox().maxY
+    }
+    cfg.__nodeHeight = height
+    nodeContainer.attr('height', height)
+  },
+  // 位移所有node的y坐标
+  fitAllNodePosition() {
+    // 需要等layout执行完，在定义的时候必须要将animate置为false
+    setTimeout(() => {
+      const vGap = 40
+      const graph = window.__treeGraph
+      const allGroup = graph.findAll('node', () => true)
+      const levelList = allGroup.map((node) => {
+        return node.getModel().__level
+      })
+      const maxLevel = Math.max.call(...levelList)
+      for (let i = 0; i <= maxLevel; i++) {
+        const levelGroup = graph.findAll('node', (node) => node.getModel().__level === i)
+        for (let j = 0; j <= levelGroup.length; j++) {
+          const currentGroup = levelGroup[j]
+          const nextGroup = levelGroup[j + 1]
+          if (nextGroup) {
+            const currentGroupBottomY = currentGroup.getBBox().y + currentGroup.getModel().__nodeHeight
+            if (nextGroup.getBBox().y - currentGroupBottomY < vGap) {
+              // 下移
+              const diff = currentGroupBottomY + vGap - nextGroup.getBBox().y
+              graph.updateItem(nextGroup, {
+                y: nextGroup.getBBox().y + diff
+              })
+            } else {
+              // 上移
+              const diff = nextGroup.getBBox().y - (currentGroupBottomY + vGap)
+              graph.updateItem(nextGroup, {
+                y: nextGroup.getBBox().y - diff
+              })
+            }
+          }
+        }
+      }
+    }, 20)
   },
   // 创建带有文字的rect
   createNodeTextBox({
@@ -379,32 +485,74 @@ const nodeBasicMethod = {
 registerNode(
   TREE_GRAPH_CARD_CARD_NAME, {
     draw(cfg, group) {
-      const nodeContainer = nodeBasicMethod.createNodeBox(group)
+      const nodeContainer = nodeBasicMethod.createNodeBox(cfg, group)
       nodeBasicMethod.createNodeTitle(cfg, group)
-      nodeBasicMethod.createNodeSubTitle(cfg, group)
-      const expandDetailGroup = group.addGroup({ name: 'node-expand-detail-group' })
-      // 创建记录扩展高度后再删除
-      nodeBasicMethod.createNodeExpandDetail(cfg, group)
-      if (!cfg.__isShowDetails) {
-        expandDetailGroup.clear()
+      if (cfg.__cardType === 'host') {
+        nodeBasicMethod.createNodeSubTitle(cfg, group)
+        nodeBasicMethod.createNodeExpandDetail(cfg, group)
+        nodeBasicMethod.fitContainerHeight(cfg, group)
       }
-      nodeBasicMethod.fitContainerHeight(cfg, group, 'expand')
 
       return nodeContainer
     },
     update(cfg, item) {
       const group = item.getContainer()
-      const model = item.getModel()
-      const expandBtnText = group.find(e => e.cfg.name === 'node-expand-btn-text')
-      const expandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
-
-      expandBtnText.attr('text', cfg.__isShowDetails ? '-' : '+')
-      if (cfg.__isShowDetails) {
-        nodeBasicMethod.createNodeExpandDetail(cfg, group)
-        nodeBasicMethod.fitContainerHeight(model, group, 'expand')
-      } else {
-        expandDetailGroup.clear()
-        nodeBasicMethod.fitContainerHeight(model, group, 'collapsed')
+      if (cfg.__eventTargetName === 'details') {
+        // 要限制update的时机，不然layout会导致update执行两次
+        cfg.__eventTargetName = null
+        const nodeExpandBtnText = group.find(e => e.cfg.name === 'node-expand-btn-text')
+        if (cfg.__isShowDetails) {
+          nodeExpandBtnText.attr('text', '-')
+          nodeBasicMethod.createNodeExpandDetail(cfg, group)
+          nodeBasicMethod.fitContainerHeight(cfg, group)
+          nodeBasicMethod.fitAllNodePosition()
+        } else {
+          nodeExpandBtnText.attr('text', '+')
+          const nodeExpandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
+          group.removeChild(nodeExpandDetailGroup)
+          nodeBasicMethod.fitContainerHeight(cfg, group)
+          nodeBasicMethod.fitAllNodePosition()
+        }
+      }
+      if (cfg.__eventTargetName === 'collapsed') {
+        // 要限制update的时机，不然layout会导致update执行两次
+        cfg.__eventTargetName = null
+        const nodeCollapsedBtnText = group.find(e => e.cfg.name === 'node-collapsed-btn-text')
+        const nodeCollapsedBtnShowText = group.find(e => e.cfg.name === 'node-collapsed-btn-show-text')
+        if (!cfg.collapsed) {
+          let showText
+          if (cfg.children.length) {
+            showText = '收起所有'
+          } else {
+            showText = '收起'
+          }
+          nodeCollapsedBtnText.attr('text', '-')
+          nodeCollapsedBtnShowText.attr('text', showText)
+          nodeBasicMethod.createNodeSubTitle(cfg, group)
+          nodeBasicMethod.fitContainerHeight(cfg, group)
+          nodeBasicMethod.fitAllNodePosition()
+        } else {
+          let showText
+          if (cfg.children.length) {
+            showText = '展开所有'
+          } else {
+            showText = '展开'
+          }
+          nodeCollapsedBtnText.attr('text', '+')
+          nodeCollapsedBtnShowText.attr('text', showText)
+          const nodeSubTitleGroup = group.find(e => e.cfg.name === 'node-sub-title-group')
+          const nodeExpandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
+          group.removeChild(nodeSubTitleGroup)
+          group.removeChild(nodeExpandDetailGroup)
+          cfg.__isShowDetails = false
+          // 递归所有子项还原状态
+          Util.traverseTree(cfg, function(item) {
+            item.collapsed = true
+            item.__isShowDetails = false
+          });
+          nodeBasicMethod.fitContainerHeight(cfg, group)
+          nodeBasicMethod.fitAllNodePosition()
+        }
       }
     }
   },
