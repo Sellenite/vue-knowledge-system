@@ -8,7 +8,8 @@ import { TREE_GRAPH_CARD_CARD_NAME } from './register-tree-graph-node.js'
 export default {
   data() {
     return {
-      relationData: {}
+      relationData: {},
+      activeNo: 'xq20220329001804'
     }
   },
   created() {
@@ -25,13 +26,15 @@ export default {
         const fn = (node, level) => {
           const targetNode = {
             ...node,
-            id: Math.random() + '',
+            id: Math.random() + '', // 重要，没了id会有各种各样的问题，必须定义
             collapsed: true,
             children: [],
             __level: level,
+            __isActiveNode: this.activeNo === node.no,
             __isShowDetails: false,
             __cardType: node.cardType,
-            __eventTargetName: null,
+            __eventCollapsedFlag: false,
+            __eventDetailsFlag: false,
             __nodeHeight: 0,
           }
           if (node.children && node.children.length > 0) {
@@ -107,7 +110,7 @@ export default {
         ]
         if (expandNameGroup.includes(e.target.cfg.name)) {
           const model = e.item.getModel()
-          model.__eventTargetName = 'details'
+          model.__eventDetailsFlag = true
           model.__isShowDetails = !model.__isShowDetails
           graph.updateItem(e.item, model)
         }
@@ -119,7 +122,7 @@ export default {
         ]
         if (collapsedNameGroup.includes(e.target.cfg.name)) {
           const model = e.item.getModel()
-          model.__eventTargetName = 'collapsed'
+          model.__eventCollapsedFlag = true
           model.collapsed = !model.collapsed
           graph.updateItem(e.item, model)
           // 有子项的时候才重新渲染布局，避免闪烁
@@ -131,6 +134,55 @@ export default {
 
       graph.data(this.relationData)
       graph.render()
+      graph.fitView()
+
+      // 找到树中指定id的所有父节点(或包括自己)
+      let relateNodes = []
+
+      const getRelateNodes = (his = [], targetId = null, tree = []) => {
+        for (const item of tree) {
+          const children = item.children || []
+          if (item.no === targetId) {
+            // 如果只要返回父元素们，就写成relateNodes = his
+            relateNodes = [...his, item]
+            return true
+          } else if (children.length > 0) {
+            const history = [...his]
+            history.push(item)
+            // 终止递归的条件
+            if (getRelateNodes(history, targetId, children)) {
+              break
+            }
+          }
+        }
+      }
+
+      getRelateNodes([], this.activeNo, [this.relationData])
+
+      const activeNode = relateNodes.splice(-1, 1)[0]
+      const hostNode = relateNodes.splice(0, 1)[0]
+
+      hostNode.collapsed = false
+      hostNode.__eventCollapsedFlag = true
+
+      relateNodes.forEach((model) => {
+        model.collapsed = false
+        model.__eventCollapsedFlag = true
+      })
+
+      activeNode.collapsed = false
+      activeNode.__eventCollapsedFlag = true
+      
+      // 要先等ollapsed执行完创建了关键元素才能执行expandDetails
+      graph.changeData()
+
+      hostNode.__isShowDetails = true
+      hostNode.__eventDetailsFlag = true
+      activeNode.__isShowDetails = true
+      activeNode.__eventDetailsFlag = true
+
+      graph.changeData()
+
       graph.fitView()
     }
   }

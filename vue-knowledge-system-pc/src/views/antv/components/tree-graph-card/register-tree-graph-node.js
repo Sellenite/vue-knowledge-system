@@ -4,7 +4,6 @@ const TREE_GRAPH_CARD_CARD_NAME = 'tree-graph-card-node'
 
 const NODE_WIDTH = 244
 const NODE_HEIGHT = 46 // 高度给一个默认的初始高度，之后节点高度会有变化
-const NODE_TITLE_BOX_HEIGHT = 46
 const NODE_PADDING = [18, 18, 18, 18]
 
 // 返回当前节点需要配置的颜色等配置
@@ -56,6 +55,12 @@ const nodeBasicMethod = {
   // 创建外层最大容器作为keyShape
   createNodeBox(cfg, group) {
     // 最外面的大矩形
+    let shadowColor
+    if (cfg.__isActiveNode) {
+      shadowColor = 'rgba(255, 73, 73, 0.8)'
+    } else {
+      shadowColor = 'rgba(0, 0, 0, 0.2)'
+    }
     const nodeContainer = group.addShape('rect', {
       attrs: {
         x: 0,
@@ -63,7 +68,7 @@ const nodeBasicMethod = {
         width: NODE_WIDTH,
         height: NODE_HEIGHT,
         fill: '#FFFFFF',
-        shadowColor: 'rgba(0, 0, 0, 0.2)',
+        shadowColor: shadowColor,
         shadowBlur: 8,
         radius: 3
       },
@@ -77,6 +82,16 @@ const nodeBasicMethod = {
   createNodeTitle(cfg, group) {
     const config = getNodeConfig(cfg)
     const titleGroup = group.addGroup({ name: 'node-title-group' })
+    // 弄一个固定高度的底层
+    titleGroup.addShape('rect', {
+      attrs: {
+        x: 0,
+        y: 0,
+        width: NODE_WIDTH,
+        height: NODE_HEIGHT,
+        fill: 'transparent',
+      },
+    })
     // icon
     const iconBoxTextMap = {
       'host': '需',
@@ -166,16 +181,6 @@ const nodeBasicMethod = {
       },
       name: 'node-collapsed-btn-show-text'
     })
-    // 底部线
-    titleGroup.addShape('rect', {
-      attrs: {
-        x: 0,
-        y: NODE_TITLE_BOX_HEIGHT - 1,
-        width: NODE_WIDTH,
-        height: 1,
-        fill: '#D6D9E0'
-      }
-    })
     cfg.__nodeHeight = group.getBBox().height
   },
   // 创建标题下方区域
@@ -184,14 +189,24 @@ const nodeBasicMethod = {
     let tempY
     const config = getNodeConfig(cfg)
     const subTitleGroup = group.addGroup({ name: 'node-sub-title-group' })
-    const subTitleFontSize = 14
+    // 顶部线
+    subTitleGroup.addShape('rect', {
+      attrs: {
+        x: 0,
+        y: group.getBBox().height,
+        width: NODE_WIDTH,
+        height: 1,
+        fill: '#D6D9E0'
+      }
+    })
     // 子标题
+    const subTitleFontSize = 14
     const textArr = getStringLineArr(cfg.title, NODE_WIDTH - NODE_PADDING[1] - NODE_PADDING[3], subTitleFontSize)
     const processText = textArr.join('\n')
     subTitleGroup.addShape('text', {
       attrs: {
         x: NODE_PADDING[3],
-        y: NODE_TITLE_BOX_HEIGHT + NODE_PADDING[0],
+        y: group.getBBox().height + NODE_PADDING[0],
         text: processText,
         fontSize: subTitleFontSize,
         lineHeight: 18,
@@ -383,7 +398,6 @@ const nodeBasicMethod = {
     const graph = window.__treeGraph
     const allGroup = graph.getNodes()
     allGroup.forEach((node) => {
-      console.log(node)
       const group = node.getContainer()
       const model = node.getModel()
       const nodeContainer = group.find(e => e.cfg.name === 'node-container')
@@ -499,9 +513,9 @@ registerNode(
     },
     update(cfg, item) {
       const group = item.getContainer()
-      if (cfg.__eventTargetName === 'details') {
+      if (cfg.__eventDetailsFlag) {
         // 要限制update的时机，不然layout会导致update执行两次
-        cfg.__eventTargetName = null
+        cfg.__eventDetailsFlag = false
         const nodeExpandBtnText = group.find(e => e.cfg.name === 'node-expand-btn-text')
         if (cfg.__isShowDetails) {
           nodeExpandBtnText.attr('text', '-')
@@ -516,9 +530,9 @@ registerNode(
           nodeBasicMethod.fitAllNodePosition()
         }
       }
-      if (cfg.__eventTargetName === 'collapsed') {
+      if (cfg.__eventCollapsedFlag) {
         // 要限制update的时机，不然layout会导致update执行两次
-        cfg.__eventTargetName = null
+        cfg.__eventCollapsedFlag = false
         const nodeCollapsedBtnText = group.find(e => e.cfg.name === 'node-collapsed-btn-text')
         const nodeCollapsedBtnShowText = group.find(e => e.cfg.name === 'node-collapsed-btn-show-text')
         if (!cfg.collapsed) {
