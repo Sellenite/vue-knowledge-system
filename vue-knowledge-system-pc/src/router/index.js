@@ -150,16 +150,16 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/antv',
+    path: '/tree-graph',
     component: Layout,
-    redirect: '/antv/index',
+    redirect: '/tree-graph/index',
     children: [
       {
         path: 'index',
-        component: () => import('@/views/antv/index'),
-        name: 'Antv',
-        meta: { title: 'antv', icon: 'edit' }
-      }
+        component: () => import('@/views/antv/tree-graph/index'),
+        name: 'TreeGraph',
+        meta: { title: 'TreeGraph', icon: 'edit' }
+       }
     ]
   },
 ]

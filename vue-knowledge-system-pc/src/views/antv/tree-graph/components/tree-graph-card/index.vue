@@ -4,6 +4,7 @@
 <script>
 import { TreeGraph } from '@antv/g6'
 import { treeData } from './data.js'
+import treeGraphInstance from './instance.js'
 import { TREE_GRAPH_CARD_CARD_NAME } from './register-tree-graph-node.js'
 export default {
   data() {
@@ -100,7 +101,7 @@ export default {
         minZoom: 0.7
       })
 
-      window.__treeGraph = graph
+      treeGraphInstance.instance = graph
 
       graph.on('node:click', (e) => {
         // 点击展开/隐藏详情

@@ -1,4 +1,5 @@
 import { registerNode, Util } from '@antv/g6'
+import treeGraphInstance from './instance.js'
 
 const TREE_GRAPH_CARD_CARD_NAME = 'tree-graph-card-node'
 
@@ -395,7 +396,7 @@ const nodeBasicMethod = {
   },
   // 适应所有node的渲染高度
   fitAllContainerHeight() {
-    const graph = window.__treeGraph
+    const graph = treeGraphInstance.instance
     const allGroup = graph.getNodes()
     allGroup.forEach((node) => {
       const group = node.getContainer()
@@ -423,7 +424,7 @@ const nodeBasicMethod = {
     // 需要等layout执行完，在定义的时候必须要将animate置为false
     setTimeout(() => {
       const vGap = 40
-      const graph = window.__treeGraph
+      const graph = treeGraphInstance.instance
       const allGroup = graph.getNodes()
       const levelList = allGroup.map((node) => {
         return node.getModel().__level
