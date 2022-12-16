@@ -2,7 +2,7 @@
   <div ref="container" class="container"></div>
 </template>
 <script>
-import { TreeGraph } from '@antv/g6'
+import { TreeGraph, Util } from '@antv/g6'
 import { treeData } from './data.js'
 import treeGraphInstance from './instance.js'
 import { TREE_GRAPH_CARD_CARD_NAME } from './register-tree-graph-node.js'
@@ -11,6 +11,7 @@ export default {
     return {
       relationData: {},
       activeNo: 'xq20220329001804'
+      // activeNo: ''
     }
   },
   created() {
@@ -137,6 +138,14 @@ export default {
       graph.render()
       graph.fitView()
 
+      if (this.activeNo) {
+        this._activeRelateNode()
+      } else {
+        this._activeHostNode()
+      }
+    },
+    _activeRelateNode() {
+      const graph = treeGraphInstance.instance
       // 找到树中指定id的所有父节点(或包括自己)
       let relateNodes = []
 
@@ -160,6 +169,11 @@ export default {
 
       getRelateNodes([], this.activeNo, [this.relationData])
 
+      if (relateNodes.length === 0) {
+        this._activeHostNode()
+        return
+      }
+
       const activeNode = relateNodes.splice(-1, 1)[0]
       const hostNode = relateNodes.splice(0, 1)[0]
 
@@ -173,7 +187,7 @@ export default {
 
       activeNode.collapsed = false
       activeNode.__eventCollapsedFlag = true
-      
+
       // 要先等ollapsed执行完创建了关键元素才能执行expandDetails
       graph.changeData()
 
@@ -181,6 +195,25 @@ export default {
       hostNode.__eventDetailsFlag = true
       activeNode.__isShowDetails = true
       activeNode.__eventDetailsFlag = true
+
+      graph.changeData()
+
+      graph.fitView()
+
+      graph.moveTo(null, -activeNode.y - 100)
+    },
+    _activeHostNode() {
+      const graph = treeGraphInstance.instance
+      Util.traverseTree(this.relationData, function(item) {
+        item.collapsed = false
+        item.__eventCollapsedFlag = true
+      });
+
+      // 要先等ollapsed执行完创建了关键元素才能执行expandDetails
+      graph.changeData()
+
+      this.relationData.__isShowDetails = true
+      this.relationData.__eventDetailsFlag = true
 
       graph.changeData()
 
