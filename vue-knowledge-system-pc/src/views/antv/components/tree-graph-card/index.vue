@@ -26,10 +26,10 @@ export default {
           const targetNode = {
             ...node,
             id: Math.random() + '',
-            collapsed: node.cardType === 'host' ? false : true,
+            collapsed: true,
             children: [],
             __level: level,
-            __isShowDetails: node.cardType === 'host',
+            __isShowDetails: false,
             __cardType: node.cardType,
             __eventTargetName: null,
             __nodeHeight: 0,
@@ -92,7 +92,9 @@ export default {
           getHGap: () => {
             return 30
           }
-        }
+        },
+        maxZoom: 1,
+        minZoom: 0.7
       })
 
       window.__treeGraph = graph
@@ -120,7 +122,10 @@ export default {
           model.__eventTargetName = 'collapsed'
           model.collapsed = !model.collapsed
           graph.updateItem(e.item, model)
-          graph.layout()
+          // 有子项的时候才重新渲染布局，避免闪烁
+          if (model.children.length) {
+            graph.layout()
+          }
         }
       })
 

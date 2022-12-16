@@ -378,24 +378,31 @@ const nodeBasicMethod = {
     }
     cfg.__nodeHeight = group.getBBox().height
   },
-  // 适应自身node的高度
-  fitContainerHeight(cfg, group) {
-    const nodeContainer = group.find(e => e.cfg.name === 'node-container')
-    const nodeTitleGroup = group.find(e => e.cfg.name === 'node-title-group')
-    const nodeSubTitleGroup = group.find(e => e.cfg.name === 'node-sub-title-group')
-    const nodeExpandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
-    let height = 0
-    if (nodeTitleGroup) {
-      height = nodeTitleGroup.getBBox().maxY
-    }
-    if (nodeSubTitleGroup) {
-      height = nodeSubTitleGroup.getBBox().maxY
-    }
-    if (nodeExpandDetailGroup) {
-      height = nodeExpandDetailGroup.getBBox().maxY
-    }
-    cfg.__nodeHeight = height
-    nodeContainer.attr('height', height)
+  // 适应所有node的渲染高度
+  fitAllContainerHeight() {
+    const graph = window.__treeGraph
+    const allGroup = graph.getNodes()
+    allGroup.forEach((node) => {
+      console.log(node)
+      const group = node.getContainer()
+      const model = node.getModel()
+      const nodeContainer = group.find(e => e.cfg.name === 'node-container')
+      const nodeTitleGroup = group.find(e => e.cfg.name === 'node-title-group')
+      const nodeSubTitleGroup = group.find(e => e.cfg.name === 'node-sub-title-group')
+      const nodeExpandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
+      let height = 0
+      if (nodeTitleGroup) {
+        height = nodeTitleGroup.getBBox().maxY
+      }
+      if (nodeSubTitleGroup) {
+        height = nodeSubTitleGroup.getBBox().maxY
+      }
+      if (nodeExpandDetailGroup) {
+        height = nodeExpandDetailGroup.getBBox().maxY
+      }
+      model.__nodeHeight = height
+      nodeContainer.attr('height', height)
+    })
   },
   // 位移所有node的y坐标
   fitAllNodePosition() {
@@ -403,7 +410,7 @@ const nodeBasicMethod = {
     setTimeout(() => {
       const vGap = 40
       const graph = window.__treeGraph
-      const allGroup = graph.findAll('node', () => true)
+      const allGroup = graph.getNodes()
       const levelList = allGroup.map((node) => {
         return node.getModel().__level
       })
@@ -487,11 +494,6 @@ registerNode(
     draw(cfg, group) {
       const nodeContainer = nodeBasicMethod.createNodeBox(cfg, group)
       nodeBasicMethod.createNodeTitle(cfg, group)
-      if (cfg.__cardType === 'host') {
-        nodeBasicMethod.createNodeSubTitle(cfg, group)
-        nodeBasicMethod.createNodeExpandDetail(cfg, group)
-        nodeBasicMethod.fitContainerHeight(cfg, group)
-      }
 
       return nodeContainer
     },
@@ -504,13 +506,13 @@ registerNode(
         if (cfg.__isShowDetails) {
           nodeExpandBtnText.attr('text', '-')
           nodeBasicMethod.createNodeExpandDetail(cfg, group)
-          nodeBasicMethod.fitContainerHeight(cfg, group)
+          nodeBasicMethod.fitAllContainerHeight()
           nodeBasicMethod.fitAllNodePosition()
         } else {
           nodeExpandBtnText.attr('text', '+')
           const nodeExpandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
           group.removeChild(nodeExpandDetailGroup)
-          nodeBasicMethod.fitContainerHeight(cfg, group)
+          nodeBasicMethod.fitAllContainerHeight()
           nodeBasicMethod.fitAllNodePosition()
         }
       }
@@ -529,7 +531,7 @@ registerNode(
           nodeCollapsedBtnText.attr('text', '-')
           nodeCollapsedBtnShowText.attr('text', showText)
           nodeBasicMethod.createNodeSubTitle(cfg, group)
-          nodeBasicMethod.fitContainerHeight(cfg, group)
+          nodeBasicMethod.fitAllContainerHeight()
           nodeBasicMethod.fitAllNodePosition()
         } else {
           let showText
@@ -550,7 +552,7 @@ registerNode(
             item.collapsed = true
             item.__isShowDetails = false
           });
-          nodeBasicMethod.fitContainerHeight(cfg, group)
+          nodeBasicMethod.fitAllContainerHeight()
           nodeBasicMethod.fitAllNodePosition()
         }
       }
