@@ -423,34 +423,143 @@ const nodeBasicMethod = {
   fitAllNodePosition() {
     // 需要等layout执行完，在定义的时候必须要将animate置为false
     setTimeout(() => {
-      const vGap = 40
+      const vGap = 46
       const graph = treeGraphInstance.instance
-      const allGroup = graph.getNodes()
-      const levelList = allGroup.map((node) => {
-        return node.getModel().__level
+      const data = graph.cfg.data
+      let allCfgList = []
+      const traverse = (data) => {
+        const fn = (node, level) => {
+          allCfgList.push(node)
+          if (node.children.length > 0) {
+            node.children.forEach((item) => {
+              fn(item)
+            })
+          }
+        }
+        fn(data)
+      }
+      traverse(data)
+
+      const nodes = graph.getNodes()
+      const existNodeIds = []
+      nodes.forEach(node => {
+        existNodeIds.push(node.getModel().id)
       })
+      allCfgList = allCfgList.filter(item => {
+        return existNodeIds.includes(item.id)
+      })
+
+      const levelList = allCfgList.map(item => item.__level)
       const maxLevel = Math.max.call(...levelList)
       for (let i = 0; i <= maxLevel; i++) {
-        const levelGroup = graph.findAll('node', (node) => node.getModel().__level === i)
+        const levelGroup = allCfgList.filter(item => item.__level === i)
         for (let j = 0; j <= levelGroup.length; j++) {
           const currentGroup = levelGroup[j]
           const nextGroup = levelGroup[j + 1]
           if (nextGroup) {
-            const currentGroupBottomY = currentGroup.getBBox().y + currentGroup.getModel().__nodeHeight
-            if (nextGroup.getBBox().y - currentGroupBottomY < vGap) {
-              // 下移
-              const diff = currentGroupBottomY + vGap - nextGroup.getBBox().y
-              graph.updateItem(nextGroup, {
-                y: nextGroup.getBBox().y + diff
-              })
-            } else {
-              // 上移
-              const diff = nextGroup.getBBox().y - (currentGroupBottomY + vGap)
-              graph.updateItem(nextGroup, {
-                y: nextGroup.getBBox().y - diff
-              })
+            const y = currentGroup.__originY + currentGroup.__nodeHeight + vGap
+            if (nextGroup.__originY > y) {
+              continue
             }
           }
+          if (nextGroup) {
+            const currentGroupBottomY = currentGroup.y + currentGroup.__nodeHeight
+            if (nextGroup.y - currentGroupBottomY < vGap) {
+              // 下移
+              const diff = currentGroupBottomY + vGap - nextGroup.y
+              const node = graph.findById(nextGroup.id)
+              if (node) {
+                graph.updateItem(node, {
+                  y: nextGroup.y + diff
+                })
+              }
+            } else {
+              // 上移
+              const diff = nextGroup.y - (currentGroupBottomY + vGap)
+              const node = graph.findById(nextGroup.id)
+              if (node) {
+                graph.updateItem(node, {
+                  y: nextGroup.y - diff
+                })
+              }
+            }
+          }
+        }
+      }
+    }, 20)
+  },
+  // 位于该节点的下方的所有节点的y坐标进行移动
+  fitCurrentLevelPosition(cfg) {
+    setTimeout(() => {
+      // 对遍历顺序要强要求，千万不要用graph.findAll()或graph.getNodes()拿节点集合去遍历，否则一旦进行过collapsed
+      // 被collapsed那一方就会被push到最底层，导致顺序错乱，需要用原数据进行递归遍历
+      const graph = treeGraphInstance.instance
+      const data = graph.cfg.data
+      // 记录原有的y值，判断收起的时候需不需要进行位移
+      let sameLevelCfgList = []
+      const traverse = (data) => {
+        const fn = (node, level) => {
+          if (node.__level === cfg.__level) {
+            sameLevelCfgList.push(node)
+          }
+          if (node.children.length > 0) {
+            node.children.forEach((item) => {
+              fn(item)
+            })
+          }
+        }
+        fn(data)
+      }
+      traverse(data)
+
+      const nodes = graph.getNodes()
+      const sameLevelExistNodeIds = []
+      nodes.forEach(node => {
+        if (node.getModel().__level === cfg.__level) {
+          sameLevelExistNodeIds.push(node.getModel().id)
+        }
+      })
+      // 将正确排序的同level拿到
+      sameLevelCfgList = sameLevelCfgList.filter(item => {
+        return sameLevelExistNodeIds.includes(item.id)
+      })
+
+      const currentIndex = sameLevelCfgList.findIndex(item => item.id === cfg.id)
+      const belowCurrentCfgList = sameLevelCfgList.slice(currentIndex + 1)
+      const nextCfg = belowCurrentCfgList[0]
+      const vGap = 46
+      console.log(nextCfg)
+      // 判断是否有必要进行位移
+      if (nextCfg) {
+        const y = cfg.__originY + cfg.__nodeHeight + vGap
+        if (nextCfg.__originY > y) {
+          return
+        }
+      }
+      if (nextCfg) {
+        const currentGroupBottomY = cfg.y + cfg.__nodeHeight
+        if (nextCfg.y - currentGroupBottomY < vGap) {
+          // 下移
+          const diff = currentGroupBottomY + vGap - nextCfg.y
+          belowCurrentCfgList.forEach((item) => {
+            const node = graph.findById(item.id)
+            if (node) {
+              graph.updateItem(item.id, {
+                y: item.y + diff
+              })
+            }
+          })
+        } else {
+          // 上移
+          const diff = nextCfg.y - (currentGroupBottomY + vGap)
+          belowCurrentCfgList.forEach((item) => {
+            const node = graph.findById(item.id)
+            if (node) {
+              graph.updateItem(item.id, {
+                y: item.y - diff
+              })
+            }
+          })
         }
       }
     }, 20)
@@ -512,6 +621,9 @@ registerNode(
 
       return nodeContainer
     },
+    afterDraw(cfg, group) {
+      cfg.__originY = cfg.y
+    },
     update(cfg, item) {
       const group = item.getContainer()
       if (cfg.__eventDetailsFlag) {
@@ -522,13 +634,13 @@ registerNode(
           nodeExpandBtnText.attr('text', '-')
           nodeBasicMethod.createNodeExpandDetail(cfg, group)
           nodeBasicMethod.fitAllContainerHeight()
-          nodeBasicMethod.fitAllNodePosition()
+          nodeBasicMethod.fitCurrentLevelPosition(cfg)
         } else {
           nodeExpandBtnText.attr('text', '+')
           const nodeExpandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
           group.removeChild(nodeExpandDetailGroup)
           nodeBasicMethod.fitAllContainerHeight()
-          nodeBasicMethod.fitAllNodePosition()
+          nodeBasicMethod.fitCurrentLevelPosition(cfg)
         }
       }
       if (cfg.__eventCollapsedFlag) {
@@ -536,19 +648,7 @@ registerNode(
         cfg.__eventCollapsedFlag = false
         const nodeCollapsedBtnText = group.find(e => e.cfg.name === 'node-collapsed-btn-text')
         const nodeCollapsedBtnShowText = group.find(e => e.cfg.name === 'node-collapsed-btn-show-text')
-        if (!cfg.collapsed) {
-          let showText
-          if (cfg.children.length) {
-            showText = '收起所有'
-          } else {
-            showText = '收起'
-          }
-          nodeCollapsedBtnText.attr('text', '-')
-          nodeCollapsedBtnShowText.attr('text', showText)
-          nodeBasicMethod.createNodeSubTitle(cfg, group)
-          nodeBasicMethod.fitAllContainerHeight()
-          nodeBasicMethod.fitAllNodePosition()
-        } else {
+        if (cfg.collapsed) {
           let showText
           if (cfg.children.length) {
             showText = '展开所有'
@@ -563,15 +663,28 @@ registerNode(
           group.removeChild(nodeExpandDetailGroup)
           cfg.__isShowDetails = false
           // 递归所有子项还原状态
-          Util.traverseTree(cfg, function(item) {
+          const children = cfg.children
+          Util.traverseTree({ children }, function(item) {
             item.collapsed = true
             item.__isShowDetails = false
           });
           nodeBasicMethod.fitAllContainerHeight()
-          nodeBasicMethod.fitAllNodePosition()
+          nodeBasicMethod.fitCurrentLevelPosition(cfg)
+        } else {
+          let showText
+          if (cfg.children.length) {
+            showText = '收起所有'
+          } else {
+            showText = '收起'
+          }
+          nodeCollapsedBtnText.attr('text', '-')
+          nodeCollapsedBtnShowText.attr('text', showText)
+          nodeBasicMethod.createNodeSubTitle(cfg, group)
+          nodeBasicMethod.fitAllContainerHeight()
+          nodeBasicMethod.fitCurrentLevelPosition(cfg)
         }
       }
-    }
+    },
   },
   'single-node'
 )

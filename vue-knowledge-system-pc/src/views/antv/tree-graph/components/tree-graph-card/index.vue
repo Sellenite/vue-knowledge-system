@@ -10,7 +10,7 @@ export default {
   data() {
     return {
       relationData: {},
-      activeNo: 'xq20220329001804'
+      activeNo: 'xq20220329001006'
       // activeNo: ''
     }
   },
@@ -91,15 +91,15 @@ export default {
           getHeight: () => {
             return 46
           },
-          getVGap: () => {
-            return 20
+          getVGap: (d) => {
+            return Math.max(d.__nodeHeight / 2, 23)
           },
           getHGap: () => {
-            return 30
+            return 60
           }
         },
         maxZoom: 1,
-        minZoom: 0.7
+        minZoom: 0.8
       })
 
       treeGraphInstance.instance = graph
@@ -200,7 +200,7 @@ export default {
 
       graph.fitView()
 
-      graph.moveTo(null, -activeNode.y - 100)
+      // graph.moveTo(activeNode.x, activeNode.y)
     },
     _activeHostNode() {
       const graph = treeGraphInstance.instance
