@@ -11,6 +11,7 @@ export default {
     return {
       relationData: {},
       activeNo: 'xq20220329001006'
+      // activeNo: 'xq20220329002000'
       // activeNo: ''
     }
   },
@@ -113,6 +114,7 @@ export default {
         if (expandNameGroup.includes(e.target.cfg.name)) {
           const model = e.item.getModel()
           model.__eventDetailsFlag = true
+          model.__eventDetailsHandler = 'subjective'
           model.__isShowDetails = !model.__isShowDetails
           graph.updateItem(e.item, model)
         }
@@ -125,6 +127,7 @@ export default {
         if (collapsedNameGroup.includes(e.target.cfg.name)) {
           const model = e.item.getModel()
           model.__eventCollapsedFlag = true
+          model.__eventCollapsedHandler = 'subjective'
           model.collapsed = !model.collapsed
           graph.updateItem(e.item, model)
           // 有子项的时候才重新渲染布局，避免闪烁
@@ -188,7 +191,7 @@ export default {
       activeNode.collapsed = false
       activeNode.__eventCollapsedFlag = true
 
-      // 要先等ollapsed执行完创建了关键元素才能执行expandDetails
+      // 要先等collapsed执行完创建了关键元素才能执行expandDetails
       graph.changeData()
 
       hostNode.__isShowDetails = true
@@ -200,7 +203,7 @@ export default {
 
       graph.fitView()
 
-      // graph.moveTo(activeNode.x, activeNode.y)
+      graph.focusItem(activeNode.id)
     },
     _activeHostNode() {
       const graph = treeGraphInstance.instance
@@ -209,7 +212,7 @@ export default {
         item.__eventCollapsedFlag = true
       });
 
-      // 要先等ollapsed执行完创建了关键元素才能执行expandDetails
+      // 要先等collapsed执行完创建了关键元素才能执行expandDetails
       graph.changeData()
 
       this.relationData.__isShowDetails = true
@@ -218,6 +221,8 @@ export default {
       graph.changeData()
 
       graph.fitView()
+
+      graph.focusItem(this.relationData.id)
     }
   }
 }

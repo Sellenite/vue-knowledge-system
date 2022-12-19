@@ -6,6 +6,7 @@ const TREE_GRAPH_CARD_CARD_NAME = 'tree-graph-card-node'
 const NODE_WIDTH = 244
 const NODE_HEIGHT = 46 // 高度给一个默认的初始高度，之后节点高度会有变化
 const NODE_PADDING = [18, 18, 18, 18]
+const NODE_V_GAP = 46
 
 // 返回当前节点需要配置的颜色等配置
 const getNodeConfig = (cfg) => {
@@ -31,7 +32,6 @@ const getNodeConfig = (cfg) => {
 
   return config
 }
-
 
 // 由于节点的文本不会换行，根据节点的宽度切分详情文本到数组中，然后进行换行
 const getStringLineArr = (str, maxWidth, fontSize) => {
@@ -419,147 +419,82 @@ const nodeBasicMethod = {
       nodeContainer.attr('height', height)
     })
   },
-  // 位移所有node的y坐标
-  fitAllNodePosition() {
-    // 需要等layout执行完，在定义的时候必须要将animate置为false
-    setTimeout(() => {
-      const vGap = 46
-      const graph = treeGraphInstance.instance
-      const data = graph.cfg.data
-      let allCfgList = []
-      const traverse = (data) => {
-        const fn = (node, level) => {
-          allCfgList.push(node)
-          if (node.children.length > 0) {
-            node.children.forEach((item) => {
-              fn(item)
-            })
-          }
-        }
-        fn(data)
-      }
-      traverse(data)
-
-      const nodes = graph.getNodes()
-      const existNodeIds = []
-      nodes.forEach(node => {
-        existNodeIds.push(node.getModel().id)
-      })
-      allCfgList = allCfgList.filter(item => {
-        return existNodeIds.includes(item.id)
-      })
-
-      const levelList = allCfgList.map(item => item.__level)
-      const maxLevel = Math.max.call(...levelList)
-      for (let i = 0; i <= maxLevel; i++) {
-        const levelGroup = allCfgList.filter(item => item.__level === i)
-        for (let j = 0; j <= levelGroup.length; j++) {
-          const currentGroup = levelGroup[j]
-          const nextGroup = levelGroup[j + 1]
-          if (nextGroup) {
-            const y = currentGroup.__originY + currentGroup.__nodeHeight + vGap
-            if (nextGroup.__originY > y) {
-              continue
-            }
-          }
-          if (nextGroup) {
-            const currentGroupBottomY = currentGroup.y + currentGroup.__nodeHeight
-            if (nextGroup.y - currentGroupBottomY < vGap) {
-              // 下移
-              const diff = currentGroupBottomY + vGap - nextGroup.y
-              const node = graph.findById(nextGroup.id)
-              if (node) {
-                graph.updateItem(node, {
-                  y: nextGroup.y + diff
-                })
-              }
-            } else {
-              // 上移
-              const diff = nextGroup.y - (currentGroupBottomY + vGap)
-              const node = graph.findById(nextGroup.id)
-              if (node) {
-                graph.updateItem(node, {
-                  y: nextGroup.y - diff
-                })
-              }
-            }
-          }
+  _getAllCfgList() {
+    const graph = treeGraphInstance.instance
+    const data = graph.cfg.data
+    let allCfgList = []
+    const traverse = (data) => {
+      const fn = (node, level) => {
+        allCfgList.push(node)
+        if (node.children.length > 0) {
+          node.children.forEach((item) => {
+            fn(item)
+          })
         }
       }
-    }, 20)
+      fn(data)
+    }
+    traverse(data)
+
+    return allCfgList
+  },
+  _getExistCfgList() {
+    // 对遍历顺序有强要求，千万不要用graph.findAll()或graph.getNodes()拿节点集合去遍历，否则一旦进行过collapsed
+    // 被collapsed那一方就会被push到最底层，导致顺序错乱，需要用原数据进行递归遍历
+    const graph = treeGraphInstance.instance
+    const data = graph.cfg.data
+    let existCfgList = []
+    const traverse = (data) => {
+      const fn = (node, level) => {
+        existCfgList.push(node)
+        if (node.children.length > 0) {
+          node.children.forEach((item) => {
+            fn(item)
+          })
+        }
+      }
+      fn(data)
+    }
+    traverse(data)
+
+    const nodes = graph.getNodes()
+    const existNodeIds = []
+    nodes.forEach(node => {
+      existNodeIds.push(node.getModel().id)
+    })
+    existCfgList = existCfgList.filter(item => {
+      return existNodeIds.includes(item.id)
+    })
+
+    return existCfgList
   },
   // 位于该节点的下方的所有节点的y坐标进行移动
   fitCurrentLevelPosition(cfg) {
+    const graph = treeGraphInstance.instance
     setTimeout(() => {
-      // 对遍历顺序要强要求，千万不要用graph.findAll()或graph.getNodes()拿节点集合去遍历，否则一旦进行过collapsed
-      // 被collapsed那一方就会被push到最底层，导致顺序错乱，需要用原数据进行递归遍历
-      const graph = treeGraphInstance.instance
-      const data = graph.cfg.data
-      // 记录原有的y值，判断收起的时候需不需要进行位移
-      let sameLevelCfgList = []
-      const traverse = (data) => {
-        const fn = (node, level) => {
-          if (node.__level === cfg.__level) {
-            sameLevelCfgList.push(node)
-          }
-          if (node.children.length > 0) {
-            node.children.forEach((item) => {
-              fn(item)
+      const existCfgList = this._getExistCfgList()
+      // 修复当前level的position
+      const sameLevelCfgList = existCfgList.filter(item => item.__level === cfg.__level)
+      const currentIndex = sameLevelCfgList.findIndex(item => item.id === cfg.id)
+      const belowCurrentCfgList = sameLevelCfgList.slice(currentIndex)
+      for (let i = 0; i < belowCurrentCfgList.length; i++) {
+        const currentCfg = belowCurrentCfgList[i]
+        const nextCfg = belowCurrentCfgList[i + 1]
+        if (nextCfg) {
+          const y = currentCfg.y + currentCfg.__nodeHeight + NODE_V_GAP
+          if (nextCfg.y < y) {
+            // 下移
+            const diff = currentCfg.y + currentCfg.__nodeHeight + NODE_V_GAP - nextCfg.y
+            graph.updateItem(nextCfg.id, {
+              y: nextCfg.y + diff
+            })
+          } else if (nextCfg.y > y && !nextCfg.children.length) {
+            // 上移，由于有子项的时候如果进行这条件的上移，会导致比较奇怪的问题，将有子项的排除出去，保证下移能看到就行
+            const diff = nextCfg.y - (currentCfg.y + currentCfg.__nodeHeight + NODE_V_GAP)
+            graph.updateItem(nextCfg.id, {
+              y: nextCfg.y - diff
             })
           }
-        }
-        fn(data)
-      }
-      traverse(data)
-
-      const nodes = graph.getNodes()
-      const sameLevelExistNodeIds = []
-      nodes.forEach(node => {
-        if (node.getModel().__level === cfg.__level) {
-          sameLevelExistNodeIds.push(node.getModel().id)
-        }
-      })
-      // 将正确排序的同level拿到
-      sameLevelCfgList = sameLevelCfgList.filter(item => {
-        return sameLevelExistNodeIds.includes(item.id)
-      })
-
-      const currentIndex = sameLevelCfgList.findIndex(item => item.id === cfg.id)
-      const belowCurrentCfgList = sameLevelCfgList.slice(currentIndex + 1)
-      const nextCfg = belowCurrentCfgList[0]
-      const vGap = 46
-      console.log(nextCfg)
-      // 判断是否有必要进行位移
-      if (nextCfg) {
-        const y = cfg.__originY + cfg.__nodeHeight + vGap
-        if (nextCfg.__originY > y) {
-          return
-        }
-      }
-      if (nextCfg) {
-        const currentGroupBottomY = cfg.y + cfg.__nodeHeight
-        if (nextCfg.y - currentGroupBottomY < vGap) {
-          // 下移
-          const diff = currentGroupBottomY + vGap - nextCfg.y
-          belowCurrentCfgList.forEach((item) => {
-            const node = graph.findById(item.id)
-            if (node) {
-              graph.updateItem(item.id, {
-                y: item.y + diff
-              })
-            }
-          })
-        } else {
-          // 上移
-          const diff = nextCfg.y - (currentGroupBottomY + vGap)
-          belowCurrentCfgList.forEach((item) => {
-            const node = graph.findById(item.id)
-            if (node) {
-              graph.updateItem(item.id, {
-                y: item.y - diff
-              })
-            }
-          })
         }
       }
     }, 20)
@@ -621,9 +556,6 @@ registerNode(
 
       return nodeContainer
     },
-    afterDraw(cfg, group) {
-      cfg.__originY = cfg.y
-    },
     update(cfg, item) {
       const group = item.getContainer()
       if (cfg.__eventDetailsFlag) {
@@ -662,13 +594,14 @@ registerNode(
           group.removeChild(nodeSubTitleGroup)
           group.removeChild(nodeExpandDetailGroup)
           cfg.__isShowDetails = false
+          nodeBasicMethod.fitAllContainerHeight()
           // 递归所有子项还原状态
           const children = cfg.children
           Util.traverseTree({ children }, function(item) {
             item.collapsed = true
             item.__isShowDetails = false
+            item.__nodeHeight = NODE_HEIGHT
           });
-          nodeBasicMethod.fitAllContainerHeight()
           nodeBasicMethod.fitCurrentLevelPosition(cfg)
         } else {
           let showText
