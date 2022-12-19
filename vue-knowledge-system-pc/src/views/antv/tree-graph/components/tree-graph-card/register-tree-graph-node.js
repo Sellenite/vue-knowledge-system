@@ -594,14 +594,12 @@ registerNode(
           group.removeChild(nodeSubTitleGroup)
           group.removeChild(nodeExpandDetailGroup)
           cfg.__isShowDetails = false
-          nodeBasicMethod.fitAllContainerHeight()
-          // 递归所有子项还原状态
+          // 递归触发
           const children = cfg.children
           Util.traverseTree({ children }, function(item) {
-            item.collapsed = true
-            item.__isShowDetails = false
-            item.__nodeHeight = NODE_HEIGHT
+            item.__eventCollapsedFlag = true
           });
+          nodeBasicMethod.fitAllContainerHeight()
           nodeBasicMethod.fitCurrentLevelPosition(cfg)
         } else {
           let showText
@@ -613,6 +611,10 @@ registerNode(
           nodeCollapsedBtnText.attr('text', '-')
           nodeCollapsedBtnShowText.attr('text', showText)
           nodeBasicMethod.createNodeSubTitle(cfg, group)
+          // 还原子项的元素
+          if (cfg.__isShowDetails) {
+            nodeBasicMethod.createNodeExpandDetail(cfg, group)
+          }
           nodeBasicMethod.fitAllContainerHeight()
           nodeBasicMethod.fitCurrentLevelPosition(cfg)
         }
