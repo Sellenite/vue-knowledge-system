@@ -6,6 +6,33 @@ import { TreeGraph, Util } from '@antv/g6'
 import { treeData } from './data.js'
 import treeGraphInstance from './instance.js'
 import { TREE_GRAPH_CARD_CARD_NAME } from './register-tree-graph-node.js'
+
+const getRelateNodes = (targetId, data) => {
+  let relateNodes = []
+
+  const _getRelateNodes = (his = [], targetId = null, tree = []) => {
+    for (const item of tree) {
+      const children = item.children || []
+      if (item.no === targetId) {
+        // 如果只要返回父元素们，就写成relateNodes = his
+        relateNodes = [...his, item]
+        return true
+      } else if (children.length > 0) {
+        const history = [...his]
+        history.push(item)
+        // 终止递归的条件
+        if (_getRelateNodes(history, targetId, children)) {
+          break
+        }
+      }
+    }
+  }
+
+  _getRelateNodes([], targetId, data)
+
+  return relateNodes
+}
+
 export default {
   data() {
     return {
@@ -24,7 +51,7 @@ export default {
   methods: {
     _formatData() {
       const originData = treeData
-
+      // 初始状态数据
       const traverse = (data) => {
         const fn = (node, level) => {
           const targetNode = {
@@ -33,7 +60,7 @@ export default {
             collapsed: true,
             children: [],
             __level: level,
-            __isActiveNode: this.activeNo === node.no,
+            __isActiveNode: false,
             __isShowDetails: false,
             __cardType: node.cardType,
             __eventCollapsedFlag: false,
@@ -51,6 +78,38 @@ export default {
       }
 
       const data = traverse(originData)
+
+      if (this.activeNo) {
+        const relateNodes = getRelateNodes(this.activeNo, [data])
+        const activeNode = relateNodes.splice(-1, 1)[0]
+        const hostNode = relateNodes.splice(0, 1)[0]
+        // 至此relateNodes为activeNode的激活链
+        const relateNodesIds = relateNodes.map(item => item.id)
+        if (relateNodes.length) {
+          Util.traverseTree(data, (node) => {
+            if (node.id === hostNode.id) {
+              node.collapsed = false
+              node.__isShowDetails = true
+            } else if (relateNodesIds.includes(node.id)) {
+              node.collapsed = false
+            } else if (node.id === activeNode.id) {
+              node.collapsed = false
+              node.__isShowDetails = true
+              node.__isActiveNode = true
+            }
+          })
+        } else {
+          Util.traverseTree(data, (node) => {
+            node.collapsed = false
+          })
+          data.__isShowDetails = true
+        }
+      } else {
+        Util.traverseTree(data, (node) => {
+          node.collapsed = false
+        })
+        data.__isShowDetails = true
+      }
 
       return data
     },
@@ -87,7 +146,7 @@ export default {
             return node.id
           },
           getWidth: () => {
-            return 244
+            return 260
           },
           getHeight: () => {
             return 46
@@ -96,11 +155,11 @@ export default {
             return Math.max(d.__nodeHeight / 2, 23)
           },
           getHGap: () => {
-            return 60
+            return 70
           }
         },
         maxZoom: 1,
-        minZoom: 0.8
+        minZoom: 0.9
       })
 
       treeGraphInstance.instance = graph
@@ -114,7 +173,6 @@ export default {
         if (expandNameGroup.includes(e.target.cfg.name)) {
           const model = e.item.getModel()
           model.__eventDetailsFlag = true
-          model.__eventDetailsHandler = 'subjective'
           model.__isShowDetails = !model.__isShowDetails
           graph.updateItem(e.item, model)
         }
@@ -127,7 +185,6 @@ export default {
         if (collapsedNameGroup.includes(e.target.cfg.name)) {
           const model = e.item.getModel()
           model.__eventCollapsedFlag = true
-          model.__eventCollapsedHandler = 'subjective'
           model.collapsed = !model.collapsed
           graph.updateItem(e.item, model)
           // 有子项的时候才重新渲染布局，避免闪烁
@@ -139,91 +196,18 @@ export default {
 
       graph.data(this.relationData)
       graph.render()
+      graph.layout()
       graph.fitView()
 
-      if (this.activeNo) {
-        this._activeRelateNode()
-      } else {
-        this._activeHostNode()
-      }
+      this._focusActiveNode()
     },
-    _activeRelateNode() {
+    _focusActiveNode() {
       const graph = treeGraphInstance.instance
-      // 找到树中指定id的所有父节点(或包括自己)
-      let relateNodes = []
-
-      const getRelateNodes = (his = [], targetId = null, tree = []) => {
-        for (const item of tree) {
-          const children = item.children || []
-          if (item.no === targetId) {
-            // 如果只要返回父元素们，就写成relateNodes = his
-            relateNodes = [...his, item]
-            return true
-          } else if (children.length > 0) {
-            const history = [...his]
-            history.push(item)
-            // 终止递归的条件
-            if (getRelateNodes(history, targetId, children)) {
-              break
-            }
-          }
-        }
-      }
-
-      getRelateNodes([], this.activeNo, [this.relationData])
-
-      if (relateNodes.length === 0) {
-        this._activeHostNode()
-        return
-      }
-
+      const relateNodes = getRelateNodes(this.activeNo, [this.relationData])
       const activeNode = relateNodes.splice(-1, 1)[0]
-      const hostNode = relateNodes.splice(0, 1)[0]
-
-      hostNode.collapsed = false
-      hostNode.__eventCollapsedFlag = true
-
-      relateNodes.forEach((model) => {
-        model.collapsed = false
-        model.__eventCollapsedFlag = true
-      })
-
-      activeNode.collapsed = false
-      activeNode.__eventCollapsedFlag = true
-
-      // 要先等collapsed执行完创建了关键元素才能执行expandDetails
-      graph.changeData()
-
-      hostNode.__isShowDetails = true
-      hostNode.__eventDetailsFlag = true
-      activeNode.__isShowDetails = true
-      activeNode.__eventDetailsFlag = true
-
-      graph.changeData()
-
-      graph.fitView()
 
       graph.focusItem(activeNode.id)
     },
-    _activeHostNode() {
-      const graph = treeGraphInstance.instance
-      Util.traverseTree(this.relationData, function(item) {
-        item.collapsed = false
-        item.__eventCollapsedFlag = true
-      });
-
-      // 要先等collapsed执行完创建了关键元素才能执行expandDetails
-      graph.changeData()
-
-      this.relationData.__isShowDetails = true
-      this.relationData.__eventDetailsFlag = true
-
-      graph.changeData()
-
-      graph.fitView()
-
-      graph.focusItem(this.relationData.id)
-    }
   }
 }
 

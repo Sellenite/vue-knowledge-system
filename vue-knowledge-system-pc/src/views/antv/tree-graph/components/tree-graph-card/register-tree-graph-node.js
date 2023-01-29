@@ -3,7 +3,7 @@ import treeGraphInstance from './instance.js'
 
 const TREE_GRAPH_CARD_CARD_NAME = 'tree-graph-card-node'
 
-const NODE_WIDTH = 244
+const NODE_WIDTH = 260
 const NODE_HEIGHT = 46 // 高度给一个默认的初始高度，之后节点高度会有变化
 const NODE_PADDING = [18, 18, 18, 18]
 const NODE_V_GAP = 46
@@ -394,7 +394,26 @@ const nodeBasicMethod = {
     }
     cfg.__nodeHeight = group.getBBox().height
   },
-  // 适应所有node的渲染高度
+  // 适应当前node的渲染高度
+  fitSingleContainerHeight(cfg, group) {
+    const nodeContainer = group.find(e => e.cfg.name === 'node-container')
+    const nodeTitleGroup = group.find(e => e.cfg.name === 'node-title-group')
+    const nodeSubTitleGroup = group.find(e => e.cfg.name === 'node-sub-title-group')
+    const nodeExpandDetailGroup = group.find(e => e.cfg.name === 'node-expand-detail-group')
+    let height = 0
+    if (nodeTitleGroup) {
+      height = nodeTitleGroup.getBBox().maxY
+    }
+    if (nodeSubTitleGroup) {
+      height = nodeSubTitleGroup.getBBox().maxY
+    }
+    if (nodeExpandDetailGroup) {
+      height = nodeExpandDetailGroup.getBBox().maxY
+    }
+    cfg.__nodeHeight = height
+    nodeContainer.attr('height', height)
+  },
+  // 适应所有node的渲染高度，必须在update执行，getNodes行为是异步操作
   fitAllContainerHeight() {
     const graph = treeGraphInstance.instance
     const allGroup = graph.getNodes()
@@ -553,6 +572,13 @@ registerNode(
     draw(cfg, group) {
       const nodeContainer = nodeBasicMethod.createNodeBox(cfg, group)
       nodeBasicMethod.createNodeTitle(cfg, group)
+      if (!cfg.collapsed) {
+        nodeBasicMethod.createNodeSubTitle(cfg, group)
+        if (cfg.__isShowDetails) {
+          nodeBasicMethod.createNodeExpandDetail(cfg, group)
+        }
+      }
+      nodeBasicMethod.fitSingleContainerHeight(cfg, group)
 
       return nodeContainer
     },
@@ -594,11 +620,6 @@ registerNode(
           group.removeChild(nodeSubTitleGroup)
           group.removeChild(nodeExpandDetailGroup)
           cfg.__isShowDetails = false
-          // 递归触发
-          const children = cfg.children
-          Util.traverseTree({ children }, function(item) {
-            item.__eventCollapsedFlag = true
-          });
           nodeBasicMethod.fitAllContainerHeight()
           nodeBasicMethod.fitCurrentLevelPosition(cfg)
         } else {
@@ -611,10 +632,6 @@ registerNode(
           nodeCollapsedBtnText.attr('text', '-')
           nodeCollapsedBtnShowText.attr('text', showText)
           nodeBasicMethod.createNodeSubTitle(cfg, group)
-          // 还原子项的元素
-          if (cfg.__isShowDetails) {
-            nodeBasicMethod.createNodeExpandDetail(cfg, group)
-          }
           nodeBasicMethod.fitAllContainerHeight()
           nodeBasicMethod.fitCurrentLevelPosition(cfg)
         }
