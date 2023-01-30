@@ -66,6 +66,7 @@ export default {
             __eventCollapsedFlag: false,
             __eventDetailsFlag: false,
             __nodeHeight: 0,
+            __tempNodeHeight: 0, // 用于记录node高度变化前的高度，进行坐标位移
           }
           if (node.children && node.children.length > 0) {
             node.children.forEach((item) => {

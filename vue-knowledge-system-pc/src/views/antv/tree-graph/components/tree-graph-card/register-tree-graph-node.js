@@ -495,27 +495,21 @@ const nodeBasicMethod = {
       // 修复当前level的position
       const sameLevelCfgList = existCfgList.filter(item => item.__level === cfg.__level)
       const currentIndex = sameLevelCfgList.findIndex(item => item.id === cfg.id)
-      const belowCurrentCfgList = sameLevelCfgList.slice(currentIndex)
+      const belowCurrentCfgList = sameLevelCfgList.slice(currentIndex + 1)
+      const diff = cfg.__nodeHeight - cfg.__tempNodeHeight
       for (let i = 0; i < belowCurrentCfgList.length; i++) {
-        const currentCfg = belowCurrentCfgList[i]
-        const nextCfg = belowCurrentCfgList[i + 1]
-        if (nextCfg) {
-          const y = currentCfg.y + currentCfg.__nodeHeight + NODE_V_GAP
-          if (nextCfg.y < y) {
-            // 下移
-            const diff = currentCfg.y + currentCfg.__nodeHeight + NODE_V_GAP - nextCfg.y
-            graph.updateItem(nextCfg.id, {
-              y: nextCfg.y + diff
-            })
-          } else if (nextCfg.y > y && !nextCfg.children.length) {
-            // 上移，由于有子项的时候如果进行这条件的上移，会导致比较奇怪的问题，将有子项的排除出去，保证下移能看到就行
-            const diff = nextCfg.y - (currentCfg.y + currentCfg.__nodeHeight + NODE_V_GAP)
-            graph.updateItem(nextCfg.id, {
-              y: nextCfg.y - diff
-            })
+        const node = belowCurrentCfgList[i]
+        if (i === 0) {
+          // 由于有些node进行过collapsed操作，layout之后的坐标已经是正常的了，就无必要进行坐标位移操作
+          if (node.y - (cfg.y + cfg.__nodeHeight) === NODE_V_GAP) {
+            break
           }
         }
+        graph.updateItem(node.id, {
+          y: node.y + diff
+        })
       }
+      cfg.__tempNodeHeight = cfg.__nodeHeight
     }, 20)
   },
   // 创建带有文字的rect
@@ -587,6 +581,7 @@ registerNode(
       if (cfg.__eventDetailsFlag) {
         // 要限制update的时机，不然layout会导致update执行两次
         cfg.__eventDetailsFlag = false
+        cfg.__tempNodeHeight = cfg.__nodeHeight
         const nodeExpandBtnText = group.find(e => e.cfg.name === 'node-expand-btn-text')
         if (cfg.__isShowDetails) {
           nodeExpandBtnText.attr('text', '-')
@@ -604,6 +599,7 @@ registerNode(
       if (cfg.__eventCollapsedFlag) {
         // 要限制update的时机，不然layout会导致update执行两次
         cfg.__eventCollapsedFlag = false
+        cfg.__tempNodeHeight = cfg.__nodeHeight
         const nodeCollapsedBtnText = group.find(e => e.cfg.name === 'node-collapsed-btn-text')
         const nodeCollapsedBtnShowText = group.find(e => e.cfg.name === 'node-collapsed-btn-show-text')
         if (cfg.collapsed) {
