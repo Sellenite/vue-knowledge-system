@@ -1,11 +1,17 @@
 <template>
-  <div ref="container" class="container"></div>
+  <div ref="container" class="container">
+    <div id="graph-contextmenu">
+      <div class="graph-contextmenu-item" @click="handleCopyText">复制</div>
+    </div>
+  </div>
 </template>
 <script>
 import { TreeGraph, Util } from '@antv/g6'
 import { treeData } from './data.js'
 import treeGraphInstance from './instance.js'
 import { TREE_GRAPH_CARD_CARD_NAME } from './register-tree-graph-node.js'
+
+let currentGraphEvent = null
 
 const getRelateNodes = (targetId, data) => {
   let relateNodes = []
@@ -165,6 +171,10 @@ export default {
 
       treeGraphInstance.instance = graph
 
+      graph.on('mousedown', () => {
+        this._hideGraphContextMenu()
+      })
+
       graph.on('node:click', (e) => {
         // 点击展开/隐藏详情
         const expandNameGroup = [
@@ -195,6 +205,22 @@ export default {
         }
       })
 
+      graph.on('node:contextmenu', (e) => {
+        const canCopyItemNamesList = ['node-title', 'node-sub-title', 'node-expand-row-text']
+        if (canCopyItemNamesList.includes(e.target.cfg.name)) {
+          e.preventDefault()
+          e.stopPropagation()
+          currentGraphEvent = e
+          const graphContextMenu = document.getElementById('graph-contextmenu')
+          document.body.appendChild(graphContextMenu)
+          this.$nextTick(() => {
+            graphContextMenu.style.left = e.clientX + 'px'
+            graphContextMenu.style.top = e.clientY + 'px'
+            graphContextMenu.style.display = 'block'
+          })
+        }
+      })
+
       graph.data(this.relationData)
       graph.render()
       graph.layout()
@@ -209,6 +235,31 @@ export default {
 
       graph.focusItem(activeNode.id)
     },
+    handleCopyText() {
+      let value = currentGraphEvent.target.attrs.text || ''
+      value = value.replace(/\n/g, '')
+      this._copyText(value)
+      this._hideGraphContextMenu()
+    },
+    _hideGraphContextMenu() {
+      currentGraphEvent = null
+      const graphContextMenu = document.getElementById('graph-contextmenu')
+      if (graphContextMenu) {
+        graphContextMenu.style.display = 'none'
+      }
+    },
+    _copyText(value) {
+      const input = document.createElement('input')
+      input.value = value
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+      this.$message({
+        message: '复制成功',
+        type: 'success'
+      })
+    }
   }
 }
 
@@ -218,6 +269,30 @@ export default {
   width: 900px;
   height: 600px;
   margin: 20px auto;
+  font-size: 0
+}
+
+#graph-contextmenu {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  background: #FFF;
+  padding: 6px;
+  border-radius: 3px;
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
+  padding: 4px 0;
+
+  .graph-contextmenu-item {
+    padding: 4px 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+
+    &:hover {
+      background-color: rgba(231, 38, 56, 0.1);
+      color: #E72638;
+    }
+  }
 }
 
 </style>

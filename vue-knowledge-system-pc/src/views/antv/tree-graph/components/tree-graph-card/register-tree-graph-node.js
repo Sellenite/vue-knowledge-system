@@ -24,7 +24,14 @@ const getNodeConfig = (cfg) => {
     }
   }
 
+  const defaultColor = {
+    activeNodeShadowColor: 'rgba(255, 73, 73, 0.2)',
+    normalNodeShadowColor: 'rgba(0, 0, 0, 0.2)',
+    activeNodeBorderColor: 'rgba(255, 73, 73)',
+  }
+
   const config = {
+    ...defaultColor,
     titleIconBackgroundColor,
     titleIconFontColor,
     taskTypeFontColor
@@ -55,12 +62,18 @@ const getStringLineArr = (str, maxWidth, fontSize) => {
 const nodeBasicMethod = {
   // 创建外层最大容器作为keyShape
   createNodeBox(cfg, group) {
+    const config = getNodeConfig(cfg)
     // 最外面的大矩形
     let shadowColor
+    let lineWidth
+    let stroke
     if (cfg.__isActiveNode) {
-      shadowColor = 'rgba(255, 73, 73, 0.8)'
+      shadowColor = config.activeNodeShadowColor
+      stroke = config.activeNodeBorderColor
+      lineWidth = 2
     } else {
-      shadowColor = 'rgba(0, 0, 0, 0.2)'
+      shadowColor = config.normalNodeShadowColor
+      lineWidth = 0
     }
     const nodeContainer = group.addShape('rect', {
       attrs: {
@@ -70,6 +83,8 @@ const nodeBasicMethod = {
         height: NODE_HEIGHT,
         fill: '#FFFFFF',
         shadowColor: shadowColor,
+        stroke: stroke,
+        lineWidth: lineWidth,
         shadowBlur: 8,
         radius: 3
       },
@@ -119,7 +134,8 @@ const nodeBasicMethod = {
         textAlign: 'left',
         textBaseline: 'top',
         fill: 'rgba(133, 129, 139)'
-      }
+      },
+      name: 'node-title',
     })
     // 展开、收起的
     const collapsedBtnGroup = titleGroup.addGroup({ name: 'node-collapsed-btn-group' })
@@ -214,7 +230,8 @@ const nodeBasicMethod = {
         textAlign: 'left',
         textBaseline: 'top',
         fill: '#333333',
-      }
+      },
+      name: 'node-sub-title'
     })
     tempY = group.getBBox().height + 6
     // 普通
@@ -372,7 +389,8 @@ const nodeBasicMethod = {
             textAlign: 'left',
             textBaseline: 'top',
             fill: '#333333'
-          }
+          },
+          name: 'node-expand-row-text',
         })
         sumY += textHeight
       }
